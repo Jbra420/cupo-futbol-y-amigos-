@@ -1,69 +1,114 @@
-import Image from "next/image";
+import { BrandMark } from "@/components/brand-mark";
+import { ArrowUpRight, Check } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+
+function Pitch() {
+  const dots = [
+    [50, 85, "01"],
+    [25, 70, "04"],
+    [75, 70, "05"],
+    [50, 57, "08"],
+    [29, 38, "07"],
+    [71, 38, "10"],
+    [50, 19, "09"],
+  ] as const;
+  return (
+    <div className="pitch-card" aria-hidden="true">
+      <div className="pitch-heading">
+        <span>
+          <span className="live-dot" /> EL PLAN DE SIEMPRE
+        </span>
+        <ArrowUpRight size={20} />
+      </div>
+      <div className="pitch-surface">
+        <svg viewBox="0 0 320 400" fill="none" className="pitch-lines">
+          <rect x="20" y="20" width="280" height="360" rx="2" />
+          <path d="M20 200h280M95 20v65h130V20M125 20v28h70V20M95 380v-65h130v65M125 380v-28h70v28" />
+          <circle cx="160" cy="200" r="42" />
+          <circle cx="160" cy="200" r="2" fill="currentColor" />
+          <path d="M125 85a42 42 0 0 0 70 0M125 315a42 42 0 0 1 70 0" />
+        </svg>
+        {dots.map(([x, y, number]) => (
+          <span
+            key={number}
+            className="player-dot"
+            style={{ left: x + "%", top: y + "%" }}
+          >
+            {number}
+          </span>
+        ))}
+        <span className="pitch-sticker">
+          <Check size={16} strokeWidth={3} /> El fútbol nos junta.
+        </span>
+      </div>
+      <div className="pitch-footer">
+        <span>UNA CANCHA. TU GENTE.</span>
+        <span>Y ganas de jugar.</span>
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <div className="app-shell">
+      <a href="#contenido" className="skip-link">
+        Ir al contenido
+      </a>
+      <header className="site-header">
+        <Link
+          href="/"
+          aria-label="Fútbol y amigos, inicio"
+          className="wordmark"
+        >
+          <BrandMark />
+        </Link>
+        <div className="header-right">
+          <span className="header-caption">Fútbol con tu gente</span>
+          <ThemeToggle />
+        </div>
+      </header>
+      <main id="contenido" className="hero-layout">
+        <section className="hero-copy">
+          <div className="eyebrow">
+            <span /> PARA LOS QUE SIEMPRE SE APUNTAN
+          </div>
+          <h1>
+            Menos mensajes.
+            <br />
+            <span>Más fútbol.</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="hero-description">
+            El partido de la semana merece una mejor forma de organizarse. Junta
+            a tu gente. Nosotros ponemos el orden.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+          <div className="hero-action">
+            <Button size="lg" asChild>
+              <Link href="/panel">
+                Acceso del administrador <ArrowUpRight aria-hidden="true" />
+              </Link>
+            </Button>
+            <p>
+              <Check size={14} aria-hidden="true" /> Tus amigos se apuntan sin
+              registrarse.
+            </p>
+          </div>
+          <div className="hero-note">
+            <span className="note-line" />
+            <span>
+              Para el de los guantes, el del último gol
+              <br />y el que siempre llega justo.
+            </span>
+          </div>
+        </section>
+        <Pitch />
       </main>
+      <footer className="site-footer">
+        <span>EL MEJOR PLAN ES JUGAR.</span>
+        <span>Entre amigos, todo empieza con un cupo.</span>
+      </footer>
     </div>
   );
 }

@@ -1,36 +1,129 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Fútbol y amigos
 
-## Getting Started
+Organiza partidos con una única cuenta administradora. Los jugadores abren el enlace del partido y se apuntan sin usuario ni contraseña. La aplicación permite crear eventos, elegir fecha y número de jugadores, reprogramar partidos, administrar cupos y espera, editar equipos y compartir la alineación.
 
-First, run the development server:
+## Acceso y permisos
 
-```bash
+- **Administrador único:** entra en `/panel` con usuario y contraseña. Puede crear partidos y editar los ya programados: nombre, fecha/hora, lugar, precio opcional y número de jugadores. También administra altas, pagos y equipos.
+- **Jugadores:** entran exclusivamente por el enlace del partido. Una sesión anónima identifica su dispositivo para apuntarse o cancelar su cupo; no reciben credenciales ni permisos administrativos.
+- No hay registro público de administradores ni acceso con Google. La tabla privada `private.app_administrator` admite una sola cuenta. Las rutas, RPC y RLS comprueban ese permiso; tener una cuenta de Supabase o una identidad de Google no lo concede.
+- La edición de datos y capacidad se guarda en una transacción. Reducir cupos pide confirmación antes de pasar a los últimos confirmados a la espera. Un conflicto de revisión evita sobrescribir cambios concurrentes.
+- El administrador puede gestionar también eventos creados antes de adoptar este modelo de acceso, sin modificar sus propietarios históricos.
+
+## Funcionalidad
+
+Cupos protegidos por bloqueos PostgreSQL, espera FIFO, promoción automática, Realtime, jugadores frecuentes y niveles privados, sorteo reproducible por posición y nivel, editor de lista/cancha con mouse, touch y teclado, nombres y colores de equipos, WhatsApp, PNG y Open Graph dinámico. Interfaz en español latinoamericano, clara y oscura, con objetivos táctiles de 44 px.
+
+Stack: Next.js 15.5.28, React 19, TypeScript estricto, Tailwind 4, shadcn/ui, Supabase, PL/pgSQL, dnd-kit, html-to-image, Vitest y Playwright. Node.js 22.
+
+## Inicio local
+
+Requisitos: Node.js 22, npm, Docker y Supabase CLI.
+
+```sh
+npm ci
+supabase start -x storage-api,imgproxy,studio,edge-runtime,logflare,vector,supavisor,postgres-meta
+supabase migration up --local
+npm run supabase:env
+npm run admin:setup -- admin
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [Fútbol y amigos](http://localhost:3000) y entra en [Acceso del administrador](http://localhost:3000/panel). `admin:setup` crea la cuenta local `admin` y genera una contraseña aleatoria; la guarda en `.local/admin-credentials.json`, con permisos restringidos e ignorada por Git. No imprime la contraseña en los registros. Si la cuenta ya existe, no la reemplaza ni cambia su contraseña.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Para elegir una contraseña desde tu terminal, sin mostrarla mientras escribes:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```sh
+npm run admin:setup -- admin --interactive
+```
 
-## Learn More
+Si la cuenta ya existe y quieres cambiarla, agrega `--reset-password`. El script actúa únicamente sobre Supabase local y rechaza proyectos remotos. No uses las credenciales locales en producción.
 
-To learn more about Next.js, take a look at the following resources:
+`supabase:env` escribe solo las variables públicas locales y no sobrescribe un `.env.local` existente. Después de nuevas migraciones ejecuta `npm run supabase:types`. `supabase stop` conserva los datos y detiene los servicios. `supabase db reset` elimina los datos locales y reconstruye la base; úsalo únicamente en una instancia desechable.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+El identificador técnico del proyecto local continúa siendo `cupo` para conservar sus volúmenes y datos existentes. El nombre de la aplicación, interfaz, metadatos e imágenes es **Fútbol y amigos**.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Variables
 
-## Deploy on Vercel
+| Variable                        | Valor                                                    |
+| ------------------------------- | -------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | URL HTTPS del proyecto, o HTTP en localhost              |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clave pública anon o publishable del mismo proyecto      |
+| `NEXT_PUBLIC_SITE_URL`          | URL pública canónica de la aplicación; opcional en local |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+La aplicación no necesita `service_role`, contraseña de PostgreSQL ni credenciales de Google en Vercel. Las claves administrativas de los scripts locales se obtienen de Supabase CLI, permanecen en memoria y no llegan al navegador.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Supabase alojado y cuenta administradora
+
+1. Crea un proyecto Supabase, conecta la CLI y aplica las migraciones:
+
+   ```sh
+   supabase login
+   supabase link --project-ref TU_PROJECT_REF
+   supabase db push
+   ```
+
+   Revisa el proyecto de destino antes de aplicar cambios remotos. No ejecutes fixtures ni las suites locales contra producción.
+
+2. Habilita Anonymous Sign-In para los jugadores y el proveedor de contraseña de Supabase para validar la cuenta administradora. No configures Google ni vinculación de identidades. La aplicación no ofrece registro público; cualquier cuenta ajena sigue sin permiso administrativo.
+3. Para el usuario de administrador que elijas, por ejemplo `admin`, crea desde el panel **Authentication → Users** una cuenta con el identificador interno `admin@admin.futbolyamigos.invalid`, una contraseña segura y confirmación automática. Este correo técnico solo adapta el usuario normal al proveedor Auth; el formulario siempre pide **Usuario** y **Contraseña** y no envía correos.
+4. Copia su UUID y asigna la única cuenta desde el editor SQL del proyecto:
+
+   ```sql
+   INSERT INTO private.app_administrator (user_id, username)
+   VALUES ('UUID_DE_LA_CUENTA', 'admin');
+   ```
+
+   La restricción de la tabla impide agregar un segundo administrador. Los usuarios tienen de 3 a 40 caracteres: letras minúsculas sin acentos, números, punto, guion o guion bajo. El identificador interno debe corresponder exactamente al usuario elegido. Nunca asignes el rol mediante `user_metadata`: no se usa para autorizar.
+
+5. Configura Site URL con el dominio final de la aplicación. Verifica el acceso con usuario/contraseña, cierre de sesión y creación/edición desde un dispositivo distinto. Para recuperar una contraseña alojada, actualiza únicamente esa cuenta desde el panel Auth; la aplicación no contiene un enlace público de recuperación ni registro.
+
+Referencia: [autenticación por contraseña de Supabase](https://supabase.com/docs/guides/auth/passwords).
+
+## Rutas y datos
+
+| Ruta               | Uso                                          |
+| ------------------ | -------------------------------------------- |
+| `/`                | Presentación de Fútbol y amigos              |
+| `/panel`           | Acceso y lista de partidos del administrador |
+| `/panel/nuevo`     | Crear un partido                             |
+| `/panel/jugadores` | Jugadores frecuentes y nivel privado         |
+| `/p/[slug]`        | Inscripción, espera y alineación pública     |
+| `/p/[slug]/admin`  | Administración y edición del evento          |
+
+El algoritmo puro está en `src/lib/teams`. Todo el SQL está en `supabase/migrations`: se conservaron las migraciones originales y se agregaron las correcciones y el modelo de administrador único. Los tipos se generan desde la base real.
+
+Las publicaciones Realtime enumeran exclusivamente columnas públicas de partidos, inscripciones, equipos y asignaciones. Conserva esos filtros; una publicación completa podría exponer campos privados. Los clientes consultan snapshots seguros después de eventos y al reconectar. Los niveles, pagos e identidades de usuario permanecen fuera de la vista pública.
+
+La identidad del jugador pertenece a la sesión del navegador. Borrar sus cookies o cambiar de navegador genera otra identidad; el administrador puede gestionar el cupo anterior. Cambiar confirmados invalida la alineación publicada y conserva las asignaciones restantes como borrador. Los partidos finalizados quedan de consulta.
+
+## Pruebas
+
+Con Supabase local en ejecución:
+
+```sh
+npm run typecheck
+npm run lint
+npm test
+npm run test:integration
+npx playwright install chromium
+npm run test:e2e
+npm run build
+```
+
+Integración y E2E rechazan endpoints remotos. Las pruebas sustituyen temporalmente la cuenta administradora solo en la instancia local, usan un bloqueo para no competir y restauran la asignación anterior al terminar. Ejecútalas en una instancia local desechable, sin otras personas utilizándola; el acceso de la cuenta habitual se suspende mientras dura cada fixture. La suite E2E usa un worker por defecto porque existe un solo administrador.
+
+La integración prueba concurrencia, promoción, permisos, ausencia de privilegios por Google/metadatos y edición atómica de fecha/cupos. Playwright comprueba usuario/contraseña reales, persistencia de sesión, cierre, creación, edición, bloqueo de jugadores, inscripción, equipos, touch, teclado, PNG, Open Graph y accesibilidad, en 390 × 844 y 1440 × 900.
+
+La configuración local amplía los límites de Auth para estas suites. Ajusta los del proyecto alojado según su uso; no se copian al servicio alojado. Si habilitas CAPTCHA, integra primero su token en la sesión anónima. Los reportes y capturas están en `docs/verification` y `artifacts`.
+
+## Vercel
+
+1. Importa el repositorio con preset **Next.js**, Node **22.x**, instalación `npm ci` y build `npm run build`. La salida se detecta automáticamente.
+2. Configura las tres variables del entorno. Usa un proyecto Supabase separado para Preview si vas a probar escrituras.
+3. Aplica las migraciones y configura la cuenta administradora antes de usar el despliegue. El build no modifica la base.
+4. Publica y comprueba acceso del administrador, creación/edición, inscripción desde otro navegador, espera, Realtime, equipos y PNG. Si cambias variables públicas, vuelve a desplegar.
+
+No hay dependencia de Google OAuth. La publicación requiere conectar los proyectos alojados del propietario. La hoja nativa de compartir y Safari/iOS físico quedan fuera de Chromium local. WhatsApp puede conservar su propia caché de la vista previa; abrir el enlace presenta el estado actual.
+
+Referencias: [variables de Vercel](https://vercel.com/docs/environment-variables), [Node.js en Vercel](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions), [metadatos Next.js 15](https://nextjs.org/docs/15/app/api-reference/functions/generate-metadata).
