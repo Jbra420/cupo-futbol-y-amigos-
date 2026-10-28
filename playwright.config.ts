@@ -1,4 +1,9 @@
 import { defineConfig } from "@playwright/test";
+import {
+  e2eBaseURL,
+  e2ePort,
+  verifyProduction,
+} from "./tests/e2e/support/config";
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -9,7 +14,7 @@ export default defineConfig({
   reporter: "html",
   expect: { timeout: 10_000 },
   use: {
-    baseURL: "http://127.0.0.1:3000",
+    baseURL: e2eBaseURL,
     colorScheme: "light",
     actionTimeout: 15_000,
     navigationTimeout: 30_000,
@@ -36,8 +41,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev -- --hostname 127.0.0.1",
-    url: "http://127.0.0.1:3000",
-    reuseExistingServer: !process.env.CI,
+    command: `npm run ${verifyProduction ? "start" : "dev"} -- --hostname 127.0.0.1 --port ${e2ePort}`,
+    url: e2eBaseURL,
+    reuseExistingServer: !process.env.CI && !verifyProduction,
   },
 });

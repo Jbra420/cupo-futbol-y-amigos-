@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { nanoid } from "nanoid";
 import { createClient } from "@/lib/supabase/client";
 
 export function useMatchRealtime(
@@ -23,7 +24,7 @@ export function useMatchRealtime(
         if (active) callback.current();
       }, 80);
     };
-    let channel = client.channel(`match:${matchId}:${crypto.randomUUID()}`);
+    let channel = client.channel(`match:${matchId}:${nanoid()}`);
     for (const table of [
       "registrations",
       "team_assignments",

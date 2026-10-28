@@ -1,3 +1,4 @@
+import { e2eBaseURL } from "./support/config";
 import { mkdir } from "node:fs/promises";
 import type { BrowserContext, Page } from "@playwright/test";
 import { test, expect } from "./support/fixtures";
@@ -31,7 +32,7 @@ test("inscripción, espera, promoción y cambios de cupos se sincronizan entre d
     await page.goto(`/p/${match.slug}/admin`);
     for (let index = 0; index < 8; index++) {
       const context = await browser.newContext({
-        baseURL: "http://127.0.0.1:3000",
+        baseURL: e2eBaseURL,
         viewport:
           info.project.name === "mobile"
             ? { width: 390, height: 844 }

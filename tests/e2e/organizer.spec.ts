@@ -1,3 +1,4 @@
+import { e2eBaseURL } from "./support/config";
 import { mkdir } from "node:fs/promises";
 import { test, expect } from "./support/fixtures";
 
@@ -44,16 +45,16 @@ test("solo el administrador entra con usuario y contraseña y puede cerrar sesi�
   await page
     .getByRole("button", { name: "Cerrar sesión", exact: true })
     .click();
-  await expect(page).toHaveURL("http://127.0.0.1:3000/");
+  await expect(page).toHaveURL(`${e2eBaseURL}/`);
   await page.goto("/panel/nuevo");
-  await expect(page).toHaveURL("http://127.0.0.1:3000/panel");
+  await expect(page).toHaveURL(`${e2eBaseURL}/panel`);
   const denied = await page.request.post("/api/partidos", {
-    headers: { origin: "http://127.0.0.1:3000" },
+    headers: { origin: e2eBaseURL },
     data: {},
   });
   expect(denied.status()).toBe(403);
   await page.goto("/auth/google");
-  await expect(page).toHaveURL("http://127.0.0.1:3000/panel");
+  await expect(page).toHaveURL(`${e2eBaseURL}/panel`);
 });
 test("un organizador crea un partido y vuelve a encontrarlo en su panel", async ({
   page,
@@ -139,7 +140,7 @@ test("el administrador edita un partido programado y los jugadores reciben los c
       p_position: "MED",
     });
   const publicContext = await browser.newContext({
-    baseURL: "http://127.0.0.1:3000",
+    baseURL: e2eBaseURL,
     viewport: info.project.use.viewport,
   });
   try {
@@ -208,7 +209,7 @@ test("el administrador edita un partido programado y los jugadores reciben los c
     const denied = await viewer.request.post(
       `/api/partidos/${match.slug}/admin`,
       {
-        headers: { origin: "http://127.0.0.1:3000" },
+        headers: { origin: e2eBaseURL },
         data: { action: "capacity", capacity: 10 },
       },
     );

@@ -97,6 +97,8 @@ Las publicaciones Realtime enumeran exclusivamente columnas públicas de partido
 
 La identidad del jugador pertenece a la sesión del navegador. Borrar sus cookies o cambiar de navegador genera otra identidad; el administrador puede gestionar el cupo anterior. Cambiar confirmados invalida la alineación publicada y conserva las asignaciones restantes como borrador. Los partidos finalizados quedan de consulta.
 
+Los identificadores de los canales Realtime y las semillas del sorteo usan Nano ID con `crypto.getRandomValues()`. No dependen de `crypto.randomUUID()`, que puede faltar al abrir la aplicación por HTTP en la red local. La publicación debe usar HTTPS.
+
 ## Pruebas
 
 Con Supabase local en ejecución:
@@ -116,6 +118,15 @@ Integración y E2E rechazan endpoints remotos. Las pruebas sustituyen temporalme
 La integración prueba concurrencia, promoción, permisos, ausencia de privilegios por Google/metadatos y edición atómica de fecha/cupos. Playwright comprueba usuario/contraseña reales, persistencia de sesión, cierre, creación, edición, bloqueo de jugadores, inscripción, equipos, touch, teclado, PNG, Open Graph y accesibilidad, en 390 × 844 y 1440 × 900.
 
 La configuración local amplía los límites de Auth para estas suites. Ajusta los del proyecto alojado según su uso; no se copian al servicio alojado. Si habilitas CAPTCHA, integra primero su token en la sesión anónima. Los reportes y capturas están en `docs/verification` y `artifacts`.
+
+Para comprobar toda la suite de navegador sobre una compilación de producción local:
+
+```sh
+CUPO_VERIFY_PRODUCTION=1 NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 npm run build
+CUPO_VERIFY_PRODUCTION=1 NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 npm run test:e2e
+```
+
+Este modo usa `.next-qa` y el puerto 3100 para separar la verificación del servidor de desarrollo. Playwright inicia y detiene el servidor de pruebas; Supabase debe estar disponible en local. No configures `CUPO_VERIFY_PRODUCTION` en Vercel. La regresión de compatibilidad comprueba creación, edición, Realtime, sorteo y publicación de equipos con `crypto.randomUUID` ausente. Consulta el [informe de prepublicación](docs/verification/pre-publicacion.md).
 
 ## Vercel
 

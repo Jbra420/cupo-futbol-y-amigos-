@@ -2,7 +2,7 @@
 
 > Actualización del 28 de octubre de 2026: la aplicación se llama **Fútbol y amigos**. Por instrucción del usuario, el acceso es con **usuario y contraseña para un único administrador**, sin Google. Puede crear partidos y editar eventos programados, incluida fecha y cantidad de jugadores. Esta decisión sustituye las referencias a múltiples organizadores y Google del plan original. Consulta el [README actual](../README.md) y la [verificación de administrador](verification/administrator.md).
 
-Fecha: 28 de octubre de 2026. Estado actual: Fútbol y amigos, acceso con usuario/contraseña y administrador único verificados; 100 casos de prueba cubiertos y compilación de producción correcta. La publicación alojada sigue pendiente de conectar Supabase/Vercel.
+Fecha: 28 de octubre de 2026. Estado actual: Fútbol y amigos, acceso con usuario/contraseña y administrador único verificados; 102 pruebas aprobadas y compilación de producción correcta. Las cuentas están conectadas y el código está en GitHub; faltan crear y configurar los proyectos alojados de la aplicación. Consulta la [verificación de prepublicación](verification/pre-publicacion.md).
 
 Leyenda: `[x]` realizado y verificado; `[ ]` pendiente. Los archivos de implementación que ya existen no se dan por terminados sin pruebas. Solo se trabaja en la fase siguiente después de pasar la condición de salida de la anterior.
 
@@ -168,7 +168,7 @@ Depende de: fase 6 aprobada por sus pruebas.
 ## Comprobaciones externas diferidas
 
 - [x] Sustituir Google por usuario/contraseña y administrador único, según la nueva instrucción del usuario.
-- [ ] Conectar el proyecto Supabase alojado, aplicar migraciones y desplegar en Vercel.
+- [ ] Crear/configurar el proyecto Supabase alojado, aplicar migraciones y desplegar en Vercel.
 - [ ] Comprobar Safari/iOS físico, la hoja nativa de compartir y la vista previa dentro de WhatsApp con una URL pública.
 
 Estos puntos no se dan por acreditados por los fixtures ni por Chromium local. Los pasos están en el README.
@@ -183,3 +183,12 @@ Estos puntos no se dan por acreditados por los fixtures ni por Chromium local. L
 - [x] Comprobar 39 pruebas unitarias, 37 de integración y compilación de producción.
 - [x] Cerrar la revisión de navegador y adjuntar capturas actuales.
 - [x] Dejar preparada la cuenta local y sus credenciales fuera de Git.
+
+## Corrección de compatibilidad y prepublicación
+
+- [x] Reproducir el fallo al abrir un partido con `crypto.randomUUID` ausente.
+- [x] Corregir las llamadas del canal Realtime y del sorteo con la dependencia Nano ID existente.
+- [x] Agregar una regresión de creación, edición, Realtime y publicación de equipos en móvil y escritorio.
+- [x] Separar el build de verificación y ejecutar los 26 casos E2E sobre `next start` en una sola ejecución correcta.
+- [x] Comprobar 39 pruebas unitarias, 37 de integración, tipos, lint y auditoría de dependencias de producción.
+- [x] Registrar los pendientes reales de infraestructura y las limitaciones de la comprobación.

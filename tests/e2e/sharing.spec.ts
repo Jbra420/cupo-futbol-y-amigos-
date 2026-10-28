@@ -1,3 +1,4 @@
+import { e2eBaseURL } from "./support/config";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { test, expect } from "./support/fixtures";
 
@@ -31,7 +32,7 @@ test("comparte un enlace actualizado y exporta una alineación pública completa
       p_position: ["POR", "POR", "DEF", "DEF", "MED"][i],
     });
   const publicContext = await browser.newContext({
-    baseURL: "http://127.0.0.1:3000",
+    baseURL: e2eBaseURL,
   });
   try {
     const first = await publicContext.request.get(`/p/${match.slug}`, {
@@ -71,7 +72,7 @@ test("comparte un enlace actualizado y exporta una alineación pública completa
       .getByRole("button", { name: "Copiar enlace", exact: true })
       .click();
     await expect(page.getByLabel("Enlace del partido")).toHaveValue(
-      `http://127.0.0.1:3000/p/${match.slug}`,
+      `${e2eBaseURL}/p/${match.slug}`,
     );
     const link = new URL(
       (await page

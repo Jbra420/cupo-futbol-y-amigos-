@@ -25,6 +25,7 @@ import {
   LayoutGrid,
   CheckCircle2,
 } from "lucide-react";
+import { nanoid } from "nanoid";
 import { adminSnapshotSchema, type AdminSnapshot } from "@/lib/contracts";
 import { balanceTeams } from "@/lib/teams/balance";
 import { POSITIONS } from "@/lib/utils/positions";
@@ -335,7 +336,7 @@ export function TeamEditor({
           position: player.position,
           skill: player.skill,
         })),
-        crypto.randomUUID(),
+        nanoid(),
       );
       const next = dirty
         ? ({ ...draftRef.current, positions: {} } as Draft)

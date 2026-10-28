@@ -1,3 +1,4 @@
+import { e2eBaseURL } from "./support/config";
 import { mkdir } from "node:fs/promises";
 import { test, expect } from "./support/fixtures";
 
@@ -77,7 +78,7 @@ test("edita equipos con arrastre, teclado y touch; publica, sincroniza y conserv
     .click();
   await expect(page.locator(".admin-toolbar")).toContainText("Equipos listos");
   const publicContext = await browser.newContext({
-    baseURL: "http://127.0.0.1:3000",
+    baseURL: e2eBaseURL,
   });
   try {
     const viewer = await publicContext.newPage();
