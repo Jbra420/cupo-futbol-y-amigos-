@@ -17,23 +17,30 @@ La conexión alojada está en `.env.local`, fuera de Git. La configuración loca
 - Cinco tablas públicas y la tabla privada del administrador único, todas con RLS activado.
 - Realtime publica únicamente las columnas previstas de partidos, inscripciones, equipos y asignaciones; excluye identidades, pagos y niveles privados.
 - Activados los accesos anónimos para jugadores mediante el panel. Email/contraseña está habilitado; Google y la vinculación manual permanecen deshabilitados.
+- Vinculada la cuenta Auth confirmada que creó el propietario a `private.app_administrator` con usuario `admin`. Se conservaron su correo y contraseña.
+
+## Usuario normal y cuenta con correo
+
+Supabase identifica internamente la cuenta mediante correo. La ruta de ingreso convierte el usuario `admin` al correo configurado exclusivamente en el servidor mediante `SUPABASE_ADMIN_USERNAME` y `SUPABASE_ADMIN_EMAIL`. El formulario continúa pidiendo usuario y contraseña, sin publicar el correo ni aceptar otros nombres de usuario. La autorización final comprueba también la pertenencia a la tabla privada.
+
+Ambas variables están configuradas en `.env.local` y en el entorno Production de Vercel. Una configuración incompleta rechaza el ingreso. Las pruebas locales vacían esa asociación para conservar sus cuentas temporales aisladas.
 
 ## Verificación
 
-| Comprobación                                                           | Resultado                                                    |
-| ---------------------------------------------------------------------- | ------------------------------------------------------------ |
-| API Auth con la clave publishable                                      | HTTP `200`                                                   |
-| RPC pública `get_public_match` con un enlace inexistente               | HTTP `200`, resultado `null`                                 |
-| Consulta directa de la columna privada `registrations.paid` sin sesión | HTTP `401`, acceso rechazado                                 |
-| Historial remoto                                                       | Las 18 versiones coinciden con los archivos locales          |
-| RLS y Realtime                                                         | Consultados directamente en los catálogos PostgreSQL         |
-| TypeScript y ESLint                                                    | Sin errores                                                  |
-| Pruebas unitarias                                                      | 41 aprobadas, incluidas prioridad y compatibilidad de claves |
-| Pruebas de integración contra PostgreSQL local                         | 37 aprobadas                                                 |
-| Suite de navegador sobre producción local                              | 26 aprobadas en una ejecución                                |
-| Build de pruebas con `.env.local` alojado                              | Correcto usando exclusivamente el Supabase local             |
+| Comprobación                                                           | Resultado                                                  |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------- |
+| API Auth con la clave publishable                                      | HTTP `200`                                                 |
+| RPC pública `get_public_match` con un enlace inexistente               | HTTP `200`, resultado `null`                               |
+| Consulta directa de la columna privada `registrations.paid` sin sesión | HTTP `401`, acceso rechazado                               |
+| Historial remoto                                                       | Las 18 versiones coinciden con los archivos locales        |
+| RLS y Realtime                                                         | Consultados directamente en los catálogos PostgreSQL       |
+| TypeScript y ESLint                                                    | Sin errores                                                |
+| Pruebas unitarias                                                      | 45 aprobadas, incluidas claves y asociación usuario/correo |
+| Pruebas de integración contra PostgreSQL local                         | 37 aprobadas                                               |
+| Suite de navegador sobre producción local                              | 26 aprobadas en una ejecución                              |
+| Build de pruebas con `.env.local` alojado                              | Correcto usando exclusivamente el Supabase local           |
 
-**Total de la comprobación local: 104 pruebas aprobadas** (41 unitarias, 37 de integración y 26 de navegador).
+**Estado de las suites: 108 pruebas aprobadas** (45 unitarias, 37 de integración y 26 de navegador). Tras agregar la asociación usuario/correo se repitieron las 45 unitarias, tipos, lint, build y los 26 casos de navegador; la integración SQL corresponde a la comprobación anterior, sin cambios posteriores en el esquema.
 
 Las suites locales reemplazan tanto la URL como ambos nombres de clave con valores de la instancia local. Las credenciales administrativas de pruebas se mantienen en memoria y los fixtures rechazan endpoints remotos. No se ejecutó la suite de integración/E2E contra el proyecto alojado.
 
@@ -47,9 +54,8 @@ Referencias del asesor: [funciones públicas elevadas](https://supabase.com/docs
 
 ## Pendientes
 
-1. Completar el formulario de creación de `admin@admin.futbolyamigos.invalid` con la contraseña generada, guardada solo en `.local/admin-production-credentials.json`. El formulario está preparado con confirmación automática. La automatización del navegador no recibe el portapapeles del sistema; el propietario debe pegarla y pulsar «Create user».
-2. Asignar esa cuenta confirmada a `private.app_administrator`, con usuario `admin`, y verificar su acceso real. No existe todavía una cuenta administradora de producción asignada.
-3. Comprobar que Vercel tenga las tres variables canónicas, desplegar la versión actual y ajustar Site URL de Supabase al dominio definitivo. Se detectó un proyecto `cupo-futbol-y-amigos-`, pero la conexión de Vercel rechaza su inspección con `404` y el listado de despliegues con `403`; el despliegue no se da por validado.
-4. Configurar copias de seguridad, protección contra abuso y comprobación final desde el dominio público. El cambio/recuperación de contraseña desde la aplicación y CAPTCHA siguen pendientes de implementación si se requieren; la recuperación operativa actual se hace desde Supabase Auth.
+1. El propietario debe comprobar el acceso público con `admin` y la contraseña que eligió en Supabase. La contraseña generada previamente y guardada localmente no corresponde a esta cuenta; se marcó como no verificada, sin cambiar la contraseña real.
+2. Completar la comprobación del despliegue actualizado y ajustar Site URL de Supabase al dominio definitivo. La conexión de Vercel rechaza la inspección con `404`/`403`; su panel web sí permite revisar y configurar el proyecto.
+3. Configurar copias de seguridad, protección contra abuso y comprobación final desde el dominio público. El cambio/recuperación de contraseña desde la aplicación y CAPTCHA siguen pendientes de implementación si se requieren; la recuperación operativa actual se hace desde Supabase Auth.
 
 La contraseña y las variables locales permanecen excluidas de Git. No se ha solicitado ni añadido una clave `service_role` a la aplicación.

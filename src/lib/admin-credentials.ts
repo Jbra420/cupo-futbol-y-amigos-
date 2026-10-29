@@ -16,3 +16,18 @@ export const adminLoginSchema = z.object({
 export function adminAuthEmail(username: string) {
   return `${adminUsernameSchema.parse(username)}@admin.futbolyamigos.invalid`;
 }
+
+// A server-only mapping supports an existing Auth account without exposing its email.
+export function resolveAdminAuthEmail(
+  username: string,
+  account: { username?: string; email?: string } = {},
+): string | null {
+  const configuredUsername = account.username?.trim();
+  const configuredEmail = account.email?.trim();
+  if (!configuredUsername && !configuredEmail) return adminAuthEmail(username);
+  const expected = adminUsernameSchema.safeParse(configuredUsername);
+  const email = z.email().safeParse(configuredEmail);
+  if (!expected.success || !email.success || expected.data !== username)
+    return null;
+  return email.data;
+}

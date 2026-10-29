@@ -3,7 +3,10 @@ import { createClient as createVerifier } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseConfig } from "@/lib/env";
 import { isSameOrigin } from "@/lib/csrf";
-import { adminAuthEmail, adminLoginSchema } from "@/lib/admin-credentials";
+import {
+  resolveAdminAuthEmail,
+  adminLoginSchema,
+} from "@/lib/admin-credentials";
 import type { Database } from "@/types/database";
 
 export async function POST(request: NextRequest) {
@@ -28,6 +31,11 @@ export async function POST(request: NextRequest) {
     await request.json().catch(() => null),
   );
   if (!input.success) return denied();
+  const email = resolveAdminAuthEmail(input.data.username, {
+    username: process.env.SUPABASE_ADMIN_USERNAME,
+    email: process.env.SUPABASE_ADMIN_EMAIL,
+  });
+  if (!email) return denied();
   // Check authorization before replacing a player's existing anonymous browser session.
   const verifier = createVerifier<Database>(config.url, config.anonKey, {
     auth: {
@@ -37,7 +45,7 @@ export async function POST(request: NextRequest) {
     },
   });
   const signed = await verifier.auth.signInWithPassword({
-    email: adminAuthEmail(input.data.username),
+    email,
     password: input.data.password,
   });
   if (signed.error || !signed.data.session) return denied();

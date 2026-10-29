@@ -45,12 +45,14 @@ El identificador técnico del proyecto local continúa siendo `cupo` para conser
 
 ## Variables
 
-| Variable                               | Valor                                                    |
-| -------------------------------------- | -------------------------------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`             | URL HTTPS del proyecto, o HTTP en localhost              |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Clave pública publishable del mismo proyecto             |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY`        | Alternativa antigua/local si no hay publishable key      |
-| `NEXT_PUBLIC_SITE_URL`                 | URL pública canónica de la aplicación; opcional en local |
+| Variable                               | Valor                                                         |
+| -------------------------------------- | ------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | URL HTTPS del proyecto, o HTTP en localhost                   |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Clave pública publishable del mismo proyecto                  |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`        | Alternativa antigua/local si no hay publishable key           |
+| `NEXT_PUBLIC_SITE_URL`                 | URL pública canónica de la aplicación; opcional en local      |
+| `SUPABASE_ADMIN_USERNAME`              | Solo servidor: usuario del administrador, por ejemplo `admin` |
+| `SUPABASE_ADMIN_EMAIL`                 | Solo servidor: correo de su cuenta Auth existente             |
 
 La aplicación no necesita `service_role`, contraseña de PostgreSQL ni credenciales de Google en Vercel. Las claves administrativas de los scripts locales se obtienen de Supabase CLI, permanecen en memoria y no llegan al navegador.
 
@@ -67,7 +69,7 @@ La aplicación no necesita `service_role`, contraseña de PostgreSQL ni credenci
    Revisa el proyecto de destino antes de aplicar cambios remotos. No ejecutes fixtures ni las suites locales contra producción.
 
 2. Habilita Anonymous Sign-In para los jugadores y el proveedor de contraseña de Supabase para validar la cuenta administradora. No configures Google ni vinculación de identidades. La aplicación no ofrece registro público; cualquier cuenta ajena sigue sin permiso administrativo.
-3. Para el usuario de administrador que elijas, por ejemplo `admin`, crea desde el panel **Authentication → Users** una cuenta con el identificador interno `admin@admin.futbolyamigos.invalid`, una contraseña segura y confirmación automática. Este correo técnico solo adapta el usuario normal al proveedor Auth; el formulario siempre pide **Usuario** y **Contraseña** y no envía correos.
+3. Desde **Authentication → Users**, crea una cuenta con tu correo, una contraseña segura y confirmación automática, o conserva una cuenta confirmada que ya tengas. Para entrar como `admin`, configura en el servidor `SUPABASE_ADMIN_USERNAME=admin` y `SUPABASE_ADMIN_EMAIL` con el correo de esa cuenta. Configura siempre las dos variables juntas, sin el prefijo `NEXT_PUBLIC_`: el correo no se envía al navegador. El formulario de la aplicación pide **Usuario** y **Contraseña**; utiliza la contraseña que elegiste al crear la cuenta en Supabase.
 4. Copia su UUID y asigna la única cuenta desde el editor SQL del proyecto:
 
    ```sql
@@ -75,7 +77,7 @@ La aplicación no necesita `service_role`, contraseña de PostgreSQL ni credenci
    VALUES ('UUID_DE_LA_CUENTA', 'admin');
    ```
 
-   La restricción de la tabla impide agregar un segundo administrador. Los usuarios tienen de 3 a 40 caracteres: letras minúsculas sin acentos, números, punto, guion o guion bajo. El identificador interno debe corresponder exactamente al usuario elegido. Nunca asignes el rol mediante `user_metadata`: no se usa para autorizar.
+   La restricción de la tabla impide agregar un segundo administrador. Los usuarios tienen de 3 a 40 caracteres: letras minúsculas sin acentos, números, punto, guion o guion bajo. El usuario asignado debe coincidir con `SUPABASE_ADMIN_USERNAME`. Nunca asignes el rol mediante `user_metadata`: no se usa para autorizar. Sin ambas variables, se conserva el identificador técnico `<usuario>@admin.futbolyamigos.invalid` para las cuentas locales y las instalaciones que ya lo utilizan.
 
 5. Configura Site URL con el dominio final de la aplicación. Verifica el acceso con usuario/contraseña, cierre de sesión y creación/edición desde un dispositivo distinto. Para recuperar una contraseña alojada, actualiza únicamente esa cuenta desde el panel Auth; la aplicación no contiene un enlace público de recuperación ni registro.
 
@@ -127,12 +129,12 @@ npm run test:build
 CUPO_VERIFY_PRODUCTION=1 NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 npm run test:e2e
 ```
 
-Este modo usa `.next-qa` y el puerto 3100 para separar la verificación del servidor de desarrollo. `test:build` toma las credenciales públicas de Supabase local y reemplaza ambos nombres de clave; así las pruebas permanecen locales aunque `.env.local` apunte al proyecto alojado. Playwright inicia y detiene el servidor de pruebas; Supabase debe estar disponible en local. No configures `CUPO_VERIFY_PRODUCTION` en Vercel. La regresión de compatibilidad comprueba creación, edición, Realtime, sorteo y publicación de equipos con `crypto.randomUUID` ausente. Consulta el [informe de prepublicación](docs/verification/pre-publicacion.md) y la [configuración de Supabase alojado](docs/verification/supabase-alojado.md).
+Este modo usa `.next-qa` y el puerto 3100 para separar la verificación del servidor de desarrollo. `test:build` toma las credenciales públicas de Supabase local, reemplaza ambos nombres de clave y vacía la asociación del administrador alojado; así las pruebas permanecen locales aunque `.env.local` apunte al proyecto alojado. Playwright inicia y detiene el servidor de pruebas; Supabase debe estar disponible en local. No configures `CUPO_VERIFY_PRODUCTION` en Vercel. La regresión de compatibilidad comprueba creación, edición, Realtime, sorteo y publicación de equipos con `crypto.randomUUID` ausente. Consulta el [informe de prepublicación](docs/verification/pre-publicacion.md) y la [configuración de Supabase alojado](docs/verification/supabase-alojado.md).
 
 ## Vercel
 
 1. Importa el repositorio con preset **Next.js**, Node **22.x**, instalación `npm ci` y build `npm run build`. La salida se detecta automáticamente.
-2. Configura `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` y `NEXT_PUBLIC_SITE_URL`. El nombre antiguo `NEXT_PUBLIC_SUPABASE_ANON_KEY` sigue funcionando si no hay publishable key; si están ambos, se prefiere la publishable. Usa un proyecto Supabase separado para Preview si vas a probar escrituras.
+2. Configura `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` y `NEXT_PUBLIC_SITE_URL`. Si usas una cuenta Auth con tu propio correo, agrega también `SUPABASE_ADMIN_USERNAME` y `SUPABASE_ADMIN_EMAIL` solo en el servidor. El nombre antiguo `NEXT_PUBLIC_SUPABASE_ANON_KEY` sigue funcionando si no hay publishable key; si están ambos, se prefiere la publishable. Usa un proyecto Supabase separado para Preview si vas a probar escrituras.
 3. Aplica las migraciones y configura la cuenta administradora antes de usar el despliegue. El build no modifica la base.
 4. Publica y comprueba acceso del administrador, creación/edición, inscripción desde otro navegador, espera, Realtime, equipos y PNG. Si cambias variables públicas, vuelve a desplegar.
 

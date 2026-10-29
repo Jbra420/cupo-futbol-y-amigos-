@@ -91,6 +91,9 @@ if (mode === "env") {
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
         local.PUBLISHABLE_KEY || local.ANON_KEY,
       NEXT_PUBLIC_SUPABASE_ANON_KEY: local.ANON_KEY,
+      // Hosted administrator credentials never override the isolated local fixtures.
+      SUPABASE_ADMIN_USERNAME: "",
+      SUPABASE_ADMIN_EMAIL: "",
       ...(mode === "build"
         ? {
             CUPO_VERIFY_PRODUCTION: "1",
