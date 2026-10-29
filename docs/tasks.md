@@ -2,7 +2,7 @@
 
 > Actualización del 28 de octubre de 2026: la aplicación se llama **Fútbol y amigos**. Por instrucción del usuario, el acceso es con **usuario y contraseña para un único administrador**, sin Google. Puede crear partidos y editar eventos programados, incluida fecha y cantidad de jugadores. Esta decisión sustituye las referencias a múltiples organizadores y Google del plan original. Consulta el [README actual](../README.md) y la [verificación de administrador](verification/administrator.md).
 
-Fecha: 28 de octubre de 2026. Estado actual: Fútbol y amigos, acceso con usuario/contraseña y administrador único verificados localmente; 45 pruebas unitarias y 26 de navegador aprobadas tras el último cambio, además de 37 de integración SQL anteriores, y compilación de producción correcta. Supabase alojado tiene las 18 migraciones y la cuenta existente del propietario está asignada a `admin`. La corrección está publicada en Vercel con estado Ready y el formulario público fue comprobado; falta el ingreso del propietario con su contraseña elegida. Consulta la [configuración alojada](verification/supabase-alojado.md).
+Fecha: 28 de octubre de 2026. Estado actual: Fútbol y amigos tiene un administrador único con usuario/contraseña y ubicación de Google Maps dentro del partido. Se aprobaron 53 pruebas unitarias, 40 de integración SQL, 28 de navegador y la compilación de producción. Supabase alojado tiene las 19 migraciones y conserva el partido existente del propietario. La cuenta está asignada a `admin`; la verificación completa de escritura en producción depende de su contraseña elegida. Consulta la [configuración alojada](verification/supabase-alojado.md) y la [verificación de mapas](verification/maps.md).
 
 Leyenda: `[x]` realizado y verificado; `[ ]` pendiente. Los archivos de implementación que ya existen no se dan por terminados sin pruebas. Solo se trabaja en la fase siguiente después de pasar la condición de salida de la anterior.
 
@@ -211,3 +211,15 @@ Estos puntos no se dan por acreditados por los fixtures ni por Chromium local. L
 - [ ] Completar el acceso real del propietario en Vercel con su contraseña elegida.
 
 Detalles y pendientes: [Supabase alojado](verification/supabase-alojado.md).
+
+## Ubicación dentro del partido
+
+- [x] Agregar un enlace opcional de Google Maps al crear y editar partidos.
+- [x] Mostrar el mapa y el acceso a Google Maps para los jugadores.
+- [x] Resolver enlaces cortos y redirecciones de Ecuador sin solicitudes a otros servicios.
+- [x] Guardar y quitar el mapa de forma transaccional y conservar los partidos anteriores.
+- [x] Aplicar la migración 19 al proyecto alojado sin modificar el partido existente.
+- [x] Aprobar 53 pruebas unitarias, 40 de integración, 28 de navegador y compilación de producción.
+- [x] Comprobar el marcador real en un partido temporal local.
+
+Evidencia y límites: [verificación de mapas](verification/maps.md).

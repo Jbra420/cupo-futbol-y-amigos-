@@ -16,6 +16,12 @@ Cupos protegidos por bloqueos PostgreSQL, espera FIFO, promoción automática, R
 
 Stack: Next.js 15.5.28, React 19, TypeScript estricto, Tailwind 4, shadcn/ui, Supabase, PL/pgSQL, dnd-kit, html-to-image, Vitest y Playwright. Node.js 22.
 
+## Ubicación en Google Maps
+
+Al crear un partido o desde **Editar partido**, el administrador puede pegar el enlace de la cancha en **Enlace de Google Maps**. Se obtiene en Google Maps con **Compartir → Copiar enlace**. Los jugadores ven el mapa dentro del partido y pueden abrirlo con **Ver en Google Maps**. Para retirar el mapa, deja el campo vacío y guarda.
+
+El campo es opcional y los eventos anteriores conservan su ubicación de texto. Se admiten enlaces completos, búsquedas, coordenadas, enlaces cortos `maps.app.goo.gl`/`goo.gl/maps` y redirecciones de Google Ecuador. Los enlaces cortos se resuelven en el servidor antes de guardar, con tiempo y saltos limitados a Google Maps. La aplicación muestra un iframe de Maps y no necesita una clave de Google Maps Platform. Consulta la [verificación de mapas](docs/verification/maps.md).
+
 ## Inicio local
 
 Requisitos: Node.js 22, npm, Docker y Supabase CLI.

@@ -2,6 +2,7 @@
 import { useState, type FormEvent } from "react";
 import { ArrowUpRight, Users } from "lucide-react";
 import { Button } from "./ui/button";
+import { MapsLinkField } from "./match-location";
 
 export function NewMatchForm() {
   const [capacity, setCapacity] = useState(10);
@@ -20,6 +21,7 @@ export function NewMatchForm() {
           title: form.get("title"),
           startsAt: form.get("startsAt"),
           location: form.get("location"),
+          mapsUrl: form.get("mapsUrl"),
           capacity,
           price: form.get("price") ? Number(form.get("price")) : null,
         }),
@@ -63,6 +65,7 @@ export function NewMatchForm() {
             placeholder="Nombre de la cancha o dirección"
           />
         </label>
+        <MapsLinkField />
         <label>
           Precio por jugador <span className="optional">(opcional)</span>
           <div className="input-prefix">

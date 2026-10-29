@@ -16,6 +16,7 @@ export type Database = {
           created_at: string;
           id: string;
           location: string;
+          maps_url: string | null;
           organizer_id: string;
           price_per_player: number | null;
           revision: number;
@@ -29,6 +30,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           location: string;
+          maps_url?: string | null;
           organizer_id: string;
           price_per_player?: number | null;
           revision?: number;
@@ -42,6 +44,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           location?: string;
+          maps_url?: string | null;
           organizer_id?: string;
           price_per_player?: number | null;
           revision?: number;
@@ -238,6 +241,17 @@ export type Database = {
         };
         Returns: Json;
       };
+      create_match_with_map: {
+        Args: {
+          p_capacity: number;
+          p_location: string;
+          p_maps_url?: string;
+          p_price_per_player?: number;
+          p_starts_at: string;
+          p_title: string;
+        };
+        Returns: Json;
+      };
       finish_match: { Args: { p_match_id: string }; Returns: undefined };
       get_admin_match: { Args: { p_match_id: string }; Returns: Json };
       get_my_registration: { Args: { p_slug: string }; Returns: Json };
@@ -254,6 +268,7 @@ export type Database = {
           created_at: string;
           id: string;
           location: string;
+          maps_url: string | null;
           organizer_id: string;
           price_per_player: number | null;
           revision: number;
@@ -305,6 +320,19 @@ export type Database = {
           p_capacity: number;
           p_expected_revision: number;
           p_location: string;
+          p_match_id: string;
+          p_price_per_player?: number;
+          p_starts_at: string;
+          p_title: string;
+        };
+        Returns: undefined;
+      };
+      update_match_event_with_map: {
+        Args: {
+          p_capacity: number;
+          p_expected_revision: number;
+          p_location: string;
+          p_maps_url?: string;
           p_match_id: string;
           p_price_per_player?: number;
           p_starts_at: string;

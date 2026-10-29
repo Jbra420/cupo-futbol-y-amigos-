@@ -7,6 +7,7 @@ export const matchSchema = z.object({
   title: z.string(),
   starts_at: z.string(),
   location: z.string(),
+  maps_url: z.string().nullable().default(null),
   capacity: z.number(),
   status: z.enum(["open", "full", "teams_ready", "finished"]),
   price_per_player: z.number().nullable(),

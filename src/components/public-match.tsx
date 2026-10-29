@@ -1,4 +1,5 @@
 "use client";
+import { MatchLocation } from "./match-location";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { z } from "zod";
 import {
@@ -184,6 +185,10 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
           </div>
         </div>
         <MatchShare match={data.match} confirmed={confirmed.length} />
+        <MatchLocation
+          location={data.match.location}
+          mapsUrl={data.match.maps_url}
+        />
         <div className="public-layout">
           <div className="public-roster">
             <section className="card spots-card">

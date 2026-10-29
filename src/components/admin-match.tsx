@@ -18,6 +18,7 @@ import { Button } from "./ui/button";
 import { MatchShare } from "./match-share";
 import { PositionBadge } from "./position-badge";
 import { TeamEditor } from "./team-editor";
+import { MatchLocation, MapsLinkField } from "./match-location";
 
 export function AdminMatch({ initial }: { initial: AdminSnapshot }) {
   const [data, setData] = useState(initial);
@@ -134,6 +135,7 @@ export function AdminMatch({ initial }: { initial: AdminSnapshot }) {
         revision: editingRevision,
         title: form.get("title"),
         location: form.get("location"),
+        mapsUrl: form.get("mapsUrl"),
         startsAt: form.get("startsAt"),
         price: form.get("price") ? Number(form.get("price")) : null,
       })
@@ -193,6 +195,10 @@ export function AdminMatch({ initial }: { initial: AdminSnapshot }) {
         )}
       </div>
       <MatchShare match={data.match} confirmed={confirmed.length} />
+      <MatchLocation
+        location={data.match.location}
+        mapsUrl={data.match.maps_url}
+      />
       {error && (
         <p className="feedback error" role="alert">
           {error}
@@ -253,6 +259,7 @@ export function AdminMatch({ initial }: { initial: AdminSnapshot }) {
               defaultValue={data.match.location}
             />
           </label>
+          <MapsLinkField defaultValue={data.match.maps_url} />
           <label>
             Precio por jugador
             <input

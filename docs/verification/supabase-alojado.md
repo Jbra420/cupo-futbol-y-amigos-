@@ -2,6 +2,8 @@
 
 Fecha: 28 de octubre de 2026.
 
+Actualización: también se aplicó la migración 19 para la ubicación de Google Maps. Los resultados más recientes son 53 pruebas unitarias, 40 de integración y 28 de navegador. Consulta la [verificación de mapas](maps.md); las cifras de la conexión inicial que siguen se conservan como evidencia de esa fase.
+
 ## Proyecto y configuración
 
 Proyecto indicado por el propietario: `Cupo`, referencia `gexqdlgvlykuabvaqoll`, región `us-east-1`, estado `ACTIVE_HEALTHY`. Se comprobó que estaba vacío antes de instalar el esquema. La clave publishable facilitada coincide con una clave activa de ese proyecto.

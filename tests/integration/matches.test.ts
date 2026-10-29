@@ -33,6 +33,7 @@ type Match = {
   capacity: number;
   status: string;
   revision: number;
+  maps_url: string | null;
 };
 type Registration = {
   registration_id: string;
@@ -181,6 +182,106 @@ afterAll(async () => {
 });
 
 describe("RPC, RLS y concurrencia sobre Supabase real", () => {
+  it("crea un partido con mapa y expone solo su enlace público", async () => {
+    const mapsUrl = "https://www.google.com/maps?q=-2.900128,-79.005896";
+    const match = await rpc<Match>(organizer, "create_match_with_map", {
+      p_title: "Partido con mapa",
+      p_starts_at: "2027-02-10T20:00:00Z",
+      p_location: "Cancha de pruebas",
+      p_capacity: 6,
+      p_maps_url: mapsUrl,
+    });
+    expect(match.maps_url).toBe(mapsUrl);
+    const view = await rpc<Snapshot>(client(), "get_public_match", {
+      p_slug: match.slug,
+    });
+    expect(view.match.maps_url).toBe(mapsUrl);
+    expect(view.match).not.toHaveProperty("organizer_id");
+    expect((await makeMatch()).maps_url).toBeNull();
+  });
+
+  it("reserva los mapas al administrador y revierte la creación si el enlace es inválido", async () => {
+    const args = {
+      p_title: "Mapa inválido no debe crear evento",
+      p_starts_at: "2027-02-10T20:00:00Z",
+      p_location: "Cancha",
+      p_capacity: 6,
+      p_maps_url: "https://www.google.com/maps?q=Cuenca",
+    };
+    for (const actor of [outsider, players[0]])
+      await expect(
+        rpc(actor, "create_match_with_map", args),
+      ).rejects.toMatchObject({ code: "42501" });
+    for (const p_maps_url of [
+      "javascript:alert(1)",
+      "https://www.google.com.evil.test/maps?q=x",
+      "https://evil.test/maps",
+    ])
+      await expect(
+        rpc(organizer, "create_match_with_map", { ...args, p_maps_url }),
+      ).rejects.toMatchObject({ code: "23514" });
+    const [row] =
+      await sql`SELECT count(*)::integer AS total FROM public.matches WHERE title = ${args.p_title}`;
+    expect(row.total).toBe(0);
+  });
+
+  it("edita o elimina el mapa de forma atómica, respeta revisión y conserva RPC anteriores", async () => {
+    const match = await makeMatch(6);
+    const initial = await rpc<Snapshot>(organizer, "get_admin_match", {
+      p_match_id: match.id,
+    });
+    const args = {
+      p_match_id: match.id,
+      p_title: "Nueva cancha con mapa",
+      p_starts_at: "2027-02-11T01:00:00Z",
+      p_location: "Cancha nueva",
+      p_capacity: 6,
+      p_expected_revision: initial.match.revision,
+      p_maps_url: "https://www.google.com/maps?q=-2.9,-79",
+    };
+    await expect(
+      rpc(players[0], "update_match_event_with_map", args),
+    ).rejects.toMatchObject({ code: "42501" });
+    await rpc(organizer, "update_match_event_with_map", args);
+    const saved = await rpc<Snapshot>(organizer, "get_admin_match", {
+      p_match_id: match.id,
+    });
+    expect(saved.match.maps_url).toBe(args.p_maps_url);
+    await expect(
+      rpc(organizer, "update_match_event_with_map", args),
+    ).rejects.toMatchObject({ code: "PT409" });
+    await expect(
+      rpc(organizer, "update_match_event_with_map", {
+        ...args,
+        p_expected_revision: saved.match.revision,
+        p_title: "No guardar",
+        p_maps_url: "https://evil.test",
+      }),
+    ).rejects.toMatchObject({ code: "23514" });
+    const unchanged = await rpc<Snapshot>(organizer, "get_admin_match", {
+      p_match_id: match.id,
+    });
+    expect(unchanged.match).toEqual(saved.match);
+    await rpc(organizer, "update_match_event", {
+      ...args,
+      p_maps_url: undefined,
+      p_expected_revision: saved.match.revision,
+    });
+    const legacy = await rpc<Snapshot>(organizer, "get_admin_match", {
+      p_match_id: match.id,
+    });
+    expect(legacy.match.maps_url).toBe(args.p_maps_url);
+    await rpc(organizer, "update_match_event_with_map", {
+      ...args,
+      p_maps_url: null,
+      p_expected_revision: legacy.match.revision,
+    });
+    const cleared = await rpc<Snapshot>(client(), "get_public_match", {
+      p_slug: match.slug,
+    });
+    expect(cleared.match.maps_url).toBeNull();
+  });
+
   it("solo una cuenta asignada tiene permisos, aunque otra tenga Google o cambie sus metadatos", async () => {
     expect(await rpc(organizer, "is_app_administrator")).toBe(true);
     expect(await rpc(outsider, "is_app_administrator")).toBe(false);

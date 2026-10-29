@@ -10,6 +10,7 @@ import {
   publicErrorMessage,
 } from "@/lib/validation";
 import { localDateToISO } from "@/lib/date";
+import { resolveMapsLocation, MapsLocationError } from "@/lib/resolve-maps";
 
 const actionSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("capacity"), capacity: capacitySchema }),
@@ -32,6 +33,7 @@ const actionSchema = z.discriminatedUnion("action", [
     capacity: capacitySchema,
     revision: z.number().int().min(0),
     location: z.string().trim().min(1).max(200),
+    mapsUrl: z.string().trim().max(4096).nullish(),
     price: z.number().min(0).max(99999999.99).nullable(),
   }),
 ]);
@@ -117,13 +119,28 @@ export async function POST(
     case "details": {
       const date = localDateToISO(value.startsAt);
       if (!date) return apiError("Elige una fecha válida.");
-      ({ error } = await actor.supabase.rpc("update_match_event", {
+      let mapsUrl: string | null;
+      try {
+        // Older clients omit the field; preserve the saved map in that case.
+        mapsUrl =
+          value.mapsUrl === undefined
+            ? snapshot.match.maps_url
+            : await resolveMapsLocation(value.mapsUrl);
+      } catch (error) {
+        return apiError(
+          error instanceof MapsLocationError
+            ? error.message
+            : "No pudimos comprobar la ubicación.",
+        );
+      }
+      ({ error } = await actor.supabase.rpc("update_match_event_with_map", {
         p_match_id: id,
         p_title: value.title,
         p_capacity: value.capacity,
         p_expected_revision: value.revision,
         p_starts_at: date,
         p_location: value.location,
+        p_maps_url: mapsUrl ?? undefined,
         p_price_per_player: value.price ?? undefined,
       }));
       break;
