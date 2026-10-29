@@ -2,7 +2,7 @@
 
 > Actualización del 28 de octubre de 2026: la aplicación se llama **Fútbol y amigos**. Por instrucción del usuario, el acceso es con **usuario y contraseña para un único administrador**, sin Google. Puede crear partidos y editar eventos programados, incluida fecha y cantidad de jugadores. Esta decisión sustituye las referencias a múltiples organizadores y Google del plan original. Consulta el [README actual](../README.md) y la [verificación de administrador](verification/administrator.md).
 
-Fecha: 28 de octubre de 2026. Estado actual: Fútbol y amigos, acceso con usuario/contraseña y administrador único verificados localmente; 45 pruebas unitarias y 26 de navegador aprobadas tras el último cambio, además de 37 de integración SQL anteriores, y compilación de producción correcta. El Supabase alojado tiene las 18 migraciones y la cuenta existente del propietario ya está asignada a `admin`; falta su comprobación de ingreso con la contraseña elegida y verificar el despliegue actualizado. Consulta la [configuración alojada](verification/supabase-alojado.md).
+Fecha: 28 de octubre de 2026. Estado actual: Fútbol y amigos, acceso con usuario/contraseña y administrador único verificados localmente; 45 pruebas unitarias y 26 de navegador aprobadas tras el último cambio, además de 37 de integración SQL anteriores, y compilación de producción correcta. Supabase alojado tiene las 18 migraciones y la cuenta existente del propietario está asignada a `admin`. La corrección está publicada en Vercel con estado Ready y el formulario público fue comprobado; falta el ingreso del propietario con su contraseña elegida. Consulta la [configuración alojada](verification/supabase-alojado.md).
 
 Leyenda: `[x]` realizado y verificado; `[ ]` pendiente. Los archivos de implementación que ya existen no se dan por terminados sin pruebas. Solo se trabaja en la fase siguiente después de pasar la condición de salida de la anterior.
 
@@ -170,7 +170,8 @@ Depende de: fase 6 aprobada por sus pruebas.
 - [x] Sustituir Google por usuario/contraseña y administrador único, según la nueva instrucción del usuario.
 - [x] Conectar el proyecto Supabase alojado y aplicar las 18 migraciones.
 - [x] Vincular la cuenta administradora alojada existente con usuario `admin`.
-- [ ] Validar el despliegue actualizado en Vercel y el ingreso del propietario.
+- [x] Validar el despliegue de la corrección en Vercel y su formulario público.
+- [ ] Comprobar el ingreso del propietario y sus operaciones con la contraseña que eligió.
 - [ ] Comprobar Safari/iOS físico, la hoja nativa de compartir y la vista previa dentro de WhatsApp con una URL pública.
 
 Estos puntos no se dan por acreditados por los fixtures ni por Chromium local. Los pasos están en el README.
@@ -206,6 +207,7 @@ Estos puntos no se dan por acreditados por los fixtures ni por Chromium local. L
 - [x] Conservar la cuenta con correo creada por el propietario y asignar su permiso único.
 - [x] Asociar usuario normal y correo exclusivamente en el servidor, con rechazo de configuración incompleta y nombres distintos.
 - [x] Aprobar 45 pruebas unitarias, tipos, lint, build y repetir los 26 casos de navegador tras ese cambio.
-- [ ] Validar variables, despliegue y acceso real en Vercel.
+- [x] Configurar las variables de producción y el dominio definitivo de Supabase; comprobar el despliegue y el rechazo de usuarios incorrectos.
+- [ ] Completar el acceso real del propietario en Vercel con su contraseña elegida.
 
 Detalles y pendientes: [Supabase alojado](verification/supabase-alojado.md).

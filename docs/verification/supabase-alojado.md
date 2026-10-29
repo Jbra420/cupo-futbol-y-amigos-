@@ -25,6 +25,12 @@ Supabase identifica internamente la cuenta mediante correo. La ruta de ingreso c
 
 Ambas variables están configuradas en `.env.local` y en el entorno Production de Vercel. Una configuración incompleta rechaza el ingreso. Las pruebas locales vacían esa asociación para conservar sus cuentas temporales aisladas.
 
+## Despliegue público
+
+La corrección `b9a627d` se desplegó en Production con estado **Ready**, comprobado en el panel de Vercel. URL canónica: [Fútbol y amigos](https://cupo-futbol-y-amigos.vercel.app/panel). Se configuraron las dos variables privadas de asociación y `NEXT_PUBLIC_SITE_URL`; las claves públicas de Supabase ya estaban presentes. Site URL de Supabase quedó ajustada al mismo dominio definitivo.
+
+El formulario público presenta **Usuario** y **Contraseña** y no solicita correo. La comprobación HTTP devuelve `200` en `/panel` y `401` para un usuario distinto del configurado, sin revelar el correo. No se ha validado una sesión con la contraseña elegida por el propietario, que permanece desconocida para la automatización.
+
 ## Verificación
 
 | Comprobación                                                           | Resultado                                                  |
@@ -55,7 +61,6 @@ Referencias del asesor: [funciones públicas elevadas](https://supabase.com/docs
 ## Pendientes
 
 1. El propietario debe comprobar el acceso público con `admin` y la contraseña que eligió en Supabase. La contraseña generada previamente y guardada localmente no corresponde a esta cuenta; se marcó como no verificada, sin cambiar la contraseña real.
-2. Completar la comprobación del despliegue actualizado y ajustar Site URL de Supabase al dominio definitivo. La conexión de Vercel rechaza la inspección con `404`/`403`; su panel web sí permite revisar y configurar el proyecto.
-3. Configurar copias de seguridad, protección contra abuso y comprobación final desde el dominio público. El cambio/recuperación de contraseña desde la aplicación y CAPTCHA siguen pendientes de implementación si se requieren; la recuperación operativa actual se hace desde Supabase Auth.
+2. Configurar copias de seguridad, protección contra abuso y comprobar los flujos de escritura desde el dominio público con la sesión del propietario. El cambio/recuperación de contraseña desde la aplicación y CAPTCHA siguen pendientes de implementación si se requieren; la recuperación operativa actual se hace desde Supabase Auth.
 
 La contraseña y las variables locales permanecen excluidas de Git. No se ha solicitado ni añadido una clave `service_role` a la aplicación.
