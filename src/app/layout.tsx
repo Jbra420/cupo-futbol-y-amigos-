@@ -6,6 +6,8 @@ import "./globals.css";
 import { siteOrigin } from "@/lib/site";
 
 export const metadata: Metadata = {
+  applicationName: APP_NAME,
+  appleWebApp: { title: APP_NAME },
   metadataBase: new URL(siteOrigin()),
   title: {
     default: `${APP_NAME} · Organiza tu próximo partido`,
@@ -13,6 +15,7 @@ export const metadata: Metadata = {
   },
   description:
     "Organiza el partido, comparte el enlace y completa los cupos. Más fútbol con tus amigos, menos mensajes.",
+  openGraph: { siteName: APP_NAME },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

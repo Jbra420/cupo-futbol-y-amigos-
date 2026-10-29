@@ -2,9 +2,11 @@ import { ImageResponse } from "next/og";
 import { getPublicMatch } from "@/lib/public-match";
 import { spotsLabel } from "@/lib/utils/spots";
 import { formatMatchDate } from "@/lib/date";
+import { APP_NAME } from "@/lib/brand";
+import { BrandMark } from "@/components/brand-mark";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-export const alt = "Fútbol y amigos: el partido y sus cupos disponibles";
+export const alt = `${APP_NAME}: el partido y sus cupos disponibles`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export default async function Image({
@@ -47,9 +49,12 @@ export default async function Image({
           alignItems: "center",
         }}
       >
-        <span style={{ fontSize: 38, fontWeight: 800, letterSpacing: -1 }}>
-          Fútbol y amigos<span style={{ color: "#b9e66f" }}>.</span>
-        </span>
+        <BrandMark
+          width={228}
+          ink="#f5f7ed"
+          accent="#b9e66f"
+          ballInk="#14291d"
+        />
         <span style={{ color: "#c0d0c0", fontSize: 19 }}>
           FÚTBOL CON TU GENTE
         </span>

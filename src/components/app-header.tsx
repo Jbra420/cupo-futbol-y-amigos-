@@ -3,6 +3,7 @@ import Link from "next/link";
 import { LogOut } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { Button } from "./ui/button";
+import { APP_NAME } from "@/lib/brand";
 
 export function AppHeader({ organizer = false }: { organizer?: boolean }) {
   return (
@@ -14,7 +15,7 @@ export function AppHeader({ organizer = false }: { organizer?: boolean }) {
         <Link
           href={organizer ? "/panel" : "/"}
           className="wordmark"
-          aria-label="Fútbol y amigos, inicio"
+          aria-label={`${APP_NAME}, inicio`}
         >
           <BrandMark />
         </Link>

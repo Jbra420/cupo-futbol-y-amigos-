@@ -12,9 +12,7 @@ for (const theme of ["light", "dark"] as const) {
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto("/");
-    await expect(page).toHaveTitle(
-      "Fútbol y amigos · Organiza tu próximo partido",
-    );
+    await expect(page).toHaveTitle("CUPO · Organiza tu próximo partido");
     await expect(page.locator("html")).toHaveAttribute("lang", "es");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       "Menos mensajes.Más fútbol.",

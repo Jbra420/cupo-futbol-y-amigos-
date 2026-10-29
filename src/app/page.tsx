@@ -3,6 +3,7 @@ import { ArrowUpRight, Check } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { APP_NAME } from "@/lib/brand";
 
 function Pitch() {
   const dots = [
@@ -58,11 +59,7 @@ export default function Home() {
         Ir al contenido
       </a>
       <header className="site-header">
-        <Link
-          href="/"
-          aria-label="Fútbol y amigos, inicio"
-          className="wordmark"
-        >
+        <Link href="/" aria-label={`${APP_NAME}, inicio`} className="wordmark">
           <BrandMark />
         </Link>
         <div className="header-right">

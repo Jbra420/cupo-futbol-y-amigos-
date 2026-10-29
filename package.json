@@ -1,8 +1,9 @@
 {
-  "name": "futbol-y-amigos",
+  "name": "cupo",
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "brand:assets": "node scripts/brand-assets.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

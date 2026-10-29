@@ -1,8 +1,8 @@
-# Fútbol y amigos — Lista de tareas
+# CUPO — Lista de tareas
 
-> Actualización del 28 de octubre de 2026: la aplicación se llama **Fútbol y amigos**. Por instrucción del usuario, el acceso es con **usuario y contraseña para un único administrador**, sin Google. Puede crear partidos y editar eventos programados, incluida fecha y cantidad de jugadores. Esta decisión sustituye las referencias a múltiples organizadores y Google del plan original. Consulta el [README actual](../README.md) y la [verificación de administrador](verification/administrator.md).
+> Actualización del 28 de octubre de 2026: el propietario eligió **CUPO** como nombre definitivo y pidió una identidad uniforme para móvil y web. Se mantiene el acceso con **usuario y contraseña para un único administrador**, sin Google. Puede crear partidos y editar eventos programados, incluida fecha, jugadores y Google Maps. Consulta el [README actual](../README.md) y la [verificación de administrador](verification/administrator.md).
 
-Fecha: 28 de octubre de 2026. Estado actual: Fútbol y amigos tiene un administrador único con usuario/contraseña y ubicación de Google Maps dentro del partido. Se aprobaron 53 pruebas unitarias, 40 de integración SQL, 28 de navegador y la compilación de producción. Supabase alojado tiene las 19 migraciones y conserva el partido existente del propietario. La cuenta está asignada a `admin`; la verificación completa de escritura en producción depende de su contraseña elegida. Consulta la [configuración alojada](verification/supabase-alojado.md) y la [verificación de mapas](verification/maps.md).
+Fecha: 28 de octubre de 2026. Estado actual: CUPO tiene un administrador único con usuario/contraseña y ubicación de Google Maps dentro del partido. Se aprobaron 53 pruebas unitarias, 40 de integración SQL, 28 de navegador y la compilación de producción para la función de mapas. Supabase alojado tiene las 19 migraciones y conserva los partidos del propietario. Consulta la [configuración alojada](verification/supabase-alojado.md), la [verificación de mapas](verification/maps.md) y la [identidad de CUPO](verification/brand.md).
 
 Leyenda: `[x]` realizado y verificado; `[ ]` pendiente. Los archivos de implementación que ya existen no se dan por terminados sin pruebas. Solo se trabaja en la fase siguiente después de pasar la condición de salida de la anterior.
 
@@ -223,3 +223,14 @@ Detalles y pendientes: [Supabase alojado](verification/supabase-alojado.md).
 - [x] Comprobar el marcador real en un partido temporal local.
 
 Evidencia y límites: [verificación de mapas](verification/maps.md).
+
+## Identidad CUPO
+
+- [x] Dibujar un logotipo vectorial original con el nombre CUPO en una sola línea.
+- [x] Unificar encabezados, modo claro/oscuro, títulos y nombres accesibles.
+- [x] Reemplazar favicon y generar iconos para móvil y manifiesto.
+- [x] Aplicar la marca en Open Graph y alineaciones PNG.
+- [x] Comprobar tipos, lint, build, 53 pruebas unitarias y los 28 casos de navegador.
+- [x] Conservar las capturas actuales en `artifacts/brand` y los SVG editables en `public/brand`.
+
+Diseño y comprobaciones: [identidad CUPO](verification/brand.md).

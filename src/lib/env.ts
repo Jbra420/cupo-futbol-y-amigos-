@@ -31,7 +31,6 @@ export function getSupabaseConfig(): SupabaseConfig | null {
 
 export function requireSupabaseConfig(): SupabaseConfig {
   const config = getSupabaseConfig();
-  if (!config)
-    throw new Error("La conexión con Fútbol y amigos aún no está disponible.");
+  if (!config) throw new Error("La conexión con CUPO aún no está disponible.");
   return config;
 }

@@ -1,4 +1,4 @@
-# Fútbol y amigos
+# CUPO
 
 Organiza partidos con una única cuenta administradora. Los jugadores abren el enlace del partido y se apuntan sin usuario ni contraseña. La aplicación permite crear eventos, elegir fecha y número de jugadores, reprogramar partidos, administrar cupos y espera, editar equipos y compartir la alineación.
 
@@ -15,6 +15,12 @@ Organiza partidos con una única cuenta administradora. Los jugadores abren el e
 Cupos protegidos por bloqueos PostgreSQL, espera FIFO, promoción automática, Realtime, jugadores frecuentes y niveles privados, sorteo reproducible por posición y nivel, editor de lista/cancha con mouse, touch y teclado, nombres y colores de equipos, WhatsApp, PNG y Open Graph dinámico. Interfaz en español latinoamericano, clara y oscura, con objetivos táctiles de 44 px.
 
 Stack: Next.js 15.5.28, React 19, TypeScript estricto, Tailwind 4, shadcn/ui, Supabase, PL/pgSQL, dnd-kit, html-to-image, Vitest y Playwright. Node.js 22.
+
+## Identidad de CUPO
+
+El logotipo vectorial original combina una C abierta, inspirada en una cancha, con un balón que representa el cupo disponible. El nombre se conserva en una sola línea en móvil y escritorio. Encabezados, favicon, icono de inicio del móvil, imágenes de alineación y Open Graph comparten la misma geometría, con colores adaptados a fondos claros y oscuros.
+
+Los SVG de marca están en `public/brand`; la geometría editable está en `src/lib/brand.ts`. Ejecuta `npm run brand:assets` para regenerar los iconos y la [vista de identidad](artifacts/brand/cupo-identity.png). Consulta la [verificación de marca](docs/verification/brand.md).
 
 ## Ubicación en Google Maps
 
@@ -35,7 +41,7 @@ npm run admin:setup -- admin
 npm run dev
 ```
 
-Abre [Fútbol y amigos](http://localhost:3000) y entra en [Acceso del administrador](http://localhost:3000/panel). `admin:setup` crea la cuenta local `admin` y genera una contraseña aleatoria; la guarda en `.local/admin-credentials.json`, con permisos restringidos e ignorada por Git. No imprime la contraseña en los registros. Si la cuenta ya existe, no la reemplaza ni cambia su contraseña.
+Abre [CUPO](http://localhost:3000) y entra en [Acceso del administrador](http://localhost:3000/panel). `admin:setup` crea la cuenta local `admin` y genera una contraseña aleatoria; la guarda en `.local/admin-credentials.json`, con permisos restringidos e ignorada por Git. No imprime la contraseña en los registros. Si la cuenta ya existe, no la reemplaza ni cambia su contraseña.
 
 Para elegir una contraseña desde tu terminal, sin mostrarla mientras escribes:
 
@@ -47,7 +53,7 @@ Si la cuenta ya existe y quieres cambiarla, agrega `--reset-password`. El script
 
 `supabase:env` escribe solo las variables públicas locales y no sobrescribe un `.env.local` existente. Después de nuevas migraciones ejecuta `npm run supabase:types`. `supabase stop` conserva los datos y detiene los servicios. `supabase db reset` elimina los datos locales y reconstruye la base; úsalo únicamente en una instancia desechable.
 
-El identificador técnico del proyecto local continúa siendo `cupo` para conservar sus volúmenes y datos existentes. El nombre de la aplicación, interfaz, metadatos e imágenes es **Fútbol y amigos**.
+El nombre de la aplicación, interfaz, metadatos e imágenes es **CUPO**. Las referencias anteriores a Fútbol y amigos en informes de verificación son históricas. Los identificadores de cuentas y enlaces publicados se conservan para mantener su compatibilidad.
 
 ## Variables
 
@@ -93,7 +99,7 @@ Referencia: [autenticación por contraseña de Supabase](https://supabase.com/do
 
 | Ruta               | Uso                                          |
 | ------------------ | -------------------------------------------- |
-| `/`                | Presentación de Fútbol y amigos              |
+| `/`                | Presentación de CUPO                         |
 | `/panel`           | Acceso y lista de partidos del administrador |
 | `/panel/nuevo`     | Crear un partido                             |
 | `/panel/jugadores` | Jugadores frecuentes y nivel privado         |

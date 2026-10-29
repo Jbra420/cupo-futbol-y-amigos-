@@ -10,6 +10,8 @@ import type {
 import { formatMatchDate } from "@/lib/date";
 import { ReadonlyPitch } from "./pitch";
 import { Button } from "./ui/button";
+import { BrandMark } from "./brand-mark";
+import { APP_NAME } from "@/lib/brand";
 
 export function LineupShare({
   match,
@@ -43,7 +45,7 @@ export function LineupShare({
         skipFonts: true,
       });
       if (!blob) throw new Error();
-      const filename = `futbol-y-amigos-${match.slug}.png`;
+      const filename = `cupo-${match.slug}.png`;
       const file = new File([blob], filename, { type: "image/png" });
       if (share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: match.title });
@@ -106,9 +108,12 @@ export function LineupShare({
       <div className="lineup-export-stage" aria-hidden="true">
         <div ref={node} className="lineup-export">
           <div className="export-heading">
-            <strong>
-              Fútbol y amigos<span>.</span>
-            </strong>
+            <BrandMark
+              width={190}
+              ink="#f4f7ee"
+              accent="#b9e66f"
+              ballInk="#14291d"
+            />
             <span>ASÍ SALIMOS A LA CANCHA</span>
           </div>
           <h2>{match.title}</h2>
@@ -143,7 +148,7 @@ export function LineupShare({
               </section>
             ))}
           </div>
-          <footer>Más fútbol. Menos mensajes. · Fútbol y amigos</footer>
+          <footer>Más fútbol. Menos mensajes. · {APP_NAME}</footer>
         </div>
       </div>
     </div>

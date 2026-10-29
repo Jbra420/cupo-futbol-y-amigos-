@@ -95,19 +95,14 @@ a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  font-size: 37px;
-  font-weight: 800;
-  letter-spacing: -2px;
+  flex: 0 0 auto;
+  color: var(--foreground);
 }
-.brand-icon {
-  display: inline-grid;
-  place-items: center;
-  color: var(--primary);
-  margin-right: 10px;
-  transform: rotate(-8deg);
-}
-.brand-period {
-  color: var(--primary);
+.cupo-logo {
+  display: block;
+  width: 152px;
+  height: auto;
+  flex-shrink: 0;
 }
 .header-right {
   display: flex;
@@ -322,9 +317,6 @@ h1 > span {
   .site-header {
     min-height: 88px;
   }
-  .wordmark {
-    font-size: 32px;
-  }
   .header-caption {
     display: none;
   }
@@ -486,9 +478,6 @@ h3 {
   min-height: 100px;
   border-bottom: 1px solid var(--border);
   gap: 12px;
-}
-.app-header .wordmark {
-  font-size: 32px;
 }
 .app-header-actions,
 .app-header-actions nav {
@@ -916,11 +905,8 @@ h3 {
     min-height: 90px;
     gap: 6px;
   }
-  .app-header .wordmark {
-    font-size: 28px;
-  }
-  .app-header .brand-icon {
-    display: none;
+  .cupo-logo {
+    width: 128px;
   }
   .app-header-actions,
   .app-header-actions nav {
@@ -1715,12 +1701,8 @@ legend {
   align-items: center;
   margin-bottom: 24px;
 }
-.export-heading strong {
-  font-size: 38px;
-  letter-spacing: -2px;
-}
-.export-heading strong span {
-  color: #b9e66f;
+.export-heading .cupo-logo {
+  width: 190px;
 }
 .export-heading > span {
   font-size: 11px;
@@ -1875,37 +1857,6 @@ button:focus-visible {
   }
 }
 
-.brand-name {
-  display: grid;
-  line-height: 1;
-  font-size: 24px;
-  letter-spacing: -0.7px;
-  gap: 3px;
-}
-.brand-name > span {
-  font-size: 16px;
-  letter-spacing: 0;
-  color: var(--primary);
-}
-.wordmark {
-  flex-shrink: 0;
-}
-.export-heading strong {
-  font-size: 30px;
-  letter-spacing: -1px;
-}
-@media (max-width: 760px) {
-  .app-header .brand-icon {
-    margin-right: 6px;
-  }
-  .app-header .brand-name {
-    font-size: 20px;
-  }
-  .app-header .brand-name > span {
-    font-size: 13px;
-  }
-}
-
 .admin-login-form {
   display: grid;
   gap: 20px;
@@ -1918,4 +1869,14 @@ button:focus-visible {
 }
 .admin-login-form button {
   width: 100%;
+}
+
+@media (max-width: 380px) {
+  .app-header {
+    flex-wrap: wrap;
+    padding-block: 14px;
+  }
+  .app-header-actions {
+    margin-left: auto;
+  }
 }
