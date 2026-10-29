@@ -2,7 +2,7 @@
 
 > Actualización del 28 de octubre de 2026: la aplicación se llama **Fútbol y amigos**. Por instrucción del usuario, el acceso es con **usuario y contraseña para un único administrador**, sin Google. Puede crear partidos y editar eventos programados, incluida fecha y cantidad de jugadores. Esta decisión sustituye las referencias a múltiples organizadores y Google del plan original. Consulta el [README actual](../README.md) y la [verificación de administrador](verification/administrator.md).
 
-Fecha: 28 de octubre de 2026. Estado actual: Fútbol y amigos, acceso con usuario/contraseña y administrador único verificados; 102 pruebas aprobadas y compilación de producción correcta. Las cuentas están conectadas y el código está en GitHub; faltan crear y configurar los proyectos alojados de la aplicación. Consulta la [verificación de prepublicación](verification/pre-publicacion.md).
+Fecha: 28 de octubre de 2026. Estado actual: Fútbol y amigos, acceso con usuario/contraseña y administrador único verificados; 104 pruebas aprobadas y compilación de producción correcta. El código está en GitHub y el Supabase alojado ya tiene las 18 migraciones; quedan pendientes la cuenta administradora definitiva y la validación del despliegue de Vercel. Consulta la [verificación de prepublicación](verification/pre-publicacion.md).
 
 Leyenda: `[x]` realizado y verificado; `[ ]` pendiente. Los archivos de implementación que ya existen no se dan por terminados sin pruebas. Solo se trabaja en la fase siguiente después de pasar la condición de salida de la anterior.
 
@@ -168,7 +168,8 @@ Depende de: fase 6 aprobada por sus pruebas.
 ## Comprobaciones externas diferidas
 
 - [x] Sustituir Google por usuario/contraseña y administrador único, según la nueva instrucción del usuario.
-- [ ] Crear/configurar el proyecto Supabase alojado, aplicar migraciones y desplegar en Vercel.
+- [x] Conectar el proyecto Supabase alojado y aplicar las 18 migraciones.
+- [ ] Completar la cuenta administradora alojada y validar el despliegue en Vercel.
 - [ ] Comprobar Safari/iOS físico, la hoja nativa de compartir y la vista previa dentro de WhatsApp con una URL pública.
 
 Estos puntos no se dan por acreditados por los fixtures ni por Chromium local. Los pasos están en el README.
@@ -192,3 +193,16 @@ Estos puntos no se dan por acreditados por los fixtures ni por Chromium local. L
 - [x] Separar el build de verificación y ejecutar los 26 casos E2E sobre `next start` en una sola ejecución correcta.
 - [x] Comprobar 39 pruebas unitarias, 37 de integración, tipos, lint y auditoría de dependencias de producción.
 - [x] Registrar los pendientes reales de infraestructura y las limitaciones de la comprobación.
+
+## Conexión a Supabase alojado
+
+- [x] Verificar el proyecto indicado y su clave publishable activa.
+- [x] Aplicar las 18 migraciones y alinear su historial con los archivos del repositorio.
+- [x] Comprobar RLS, Realtime público y rechazo de columnas privadas desde la API.
+- [x] Admitir la variable publishable con compatibilidad para la clave anterior.
+- [x] Separar las variables locales de build y pruebas de la configuración alojada.
+- [x] Aprobar 41 pruebas unitarias, 37 de integración y 26 de navegador.
+- [ ] Crear la cuenta administradora desde el formulario privado y asignar su permiso único.
+- [ ] Validar variables, despliegue y acceso real en Vercel.
+
+Detalles y pendientes: [Supabase alojado](verification/supabase-alojado.md).

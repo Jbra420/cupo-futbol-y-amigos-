@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:integration": "node scripts/local-supabase.mjs integration",
+    "test:build": "node scripts/local-supabase.mjs build",
     "test:e2e": "node scripts/local-supabase.mjs e2e",
     "supabase:types": "node scripts/local-supabase.mjs types",
     "supabase:env": "node scripts/local-supabase.mjs env",

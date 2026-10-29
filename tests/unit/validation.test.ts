@@ -38,6 +38,27 @@ describe("validación del cupo", () => {
 });
 
 describe("configuración pública de Supabase", () => {
+  it("acepta la variable publishable y le da prioridad frente a la clave antigua", () => {
+    expect(
+      readSupabaseConfig({
+        url: "https://cupo.supabase.co",
+        publishableKey: " sb_publishable_example ",
+        anonKey: "legacy-public-key",
+      }),
+    ).toEqual({
+      url: "https://cupo.supabase.co",
+      anonKey: "sb_publishable_example",
+    });
+  });
+  it("usa la clave antigua cuando la nueva está vacía", () => {
+    expect(
+      readSupabaseConfig({
+        url: "http://127.0.0.1:54321",
+        publishableKey: " ",
+        anonKey: "local-public-key",
+      }),
+    ).toEqual({ url: "http://127.0.0.1:54321", anonKey: "local-public-key" });
+  });
   it("permite un proyecto HTTPS y elimina una barra final", () => {
     expect(
       readSupabaseConfig({

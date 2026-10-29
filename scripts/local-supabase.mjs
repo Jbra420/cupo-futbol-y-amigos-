@@ -2,8 +2,8 @@ import { spawnSync } from "node:child_process";
 import { existsSync, writeFileSync } from "node:fs";
 
 const mode = process.argv[2];
-if (!["integration", "types", "env", "e2e"].includes(mode)) {
-  console.error("Usa integration, types o env.");
+if (!["integration", "types", "env", "e2e", "build"].includes(mode)) {
+  console.error("Usa integration, types, env, e2e o build.");
   process.exit(1);
 }
 const status = spawnSync("supabase", ["status", "-o", "json"], {
@@ -65,18 +65,20 @@ if (mode === "env") {
 } else {
   // Credentials remain in process memory; never print or save the status response.
   const command =
-    mode === "e2e"
-      ? [
-          "node_modules/@playwright/test/cli.js",
-          "test",
-          ...process.argv.slice(3),
-        ]
-      : [
-          "node_modules/vitest/vitest.mjs",
-          "run",
-          "--config",
-          "vitest.integration.config.mts",
-        ];
+    mode === "build"
+      ? ["node_modules/next/dist/bin/next", "build"]
+      : mode === "e2e"
+        ? [
+            "node_modules/@playwright/test/cli.js",
+            "test",
+            ...process.argv.slice(3),
+          ]
+        : [
+            "node_modules/vitest/vitest.mjs",
+            "run",
+            "--config",
+            "vitest.integration.config.mts",
+          ];
   const test = spawnSync(process.execPath, command, {
     stdio: "inherit",
     env: {
@@ -86,7 +88,15 @@ if (mode === "env") {
       CUPO_TEST_SERVICE_ROLE_KEY: local.SERVICE_ROLE_KEY,
       CUPO_TEST_DATABASE_URL: local.DB_URL,
       NEXT_PUBLIC_SUPABASE_URL: local.API_URL,
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
+        local.PUBLISHABLE_KEY || local.ANON_KEY,
       NEXT_PUBLIC_SUPABASE_ANON_KEY: local.ANON_KEY,
+      ...(mode === "build"
+        ? {
+            CUPO_VERIFY_PRODUCTION: "1",
+            NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3100",
+          }
+        : {}),
     },
   });
   process.exit(test.status ?? 1);

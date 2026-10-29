@@ -2,10 +2,11 @@ export type SupabaseConfig = { url: string; anonKey: string };
 
 export function readSupabaseConfig(input: {
   url: string | undefined;
-  anonKey: string | undefined;
+  publishableKey?: string;
+  anonKey?: string;
 }): SupabaseConfig | null {
   const url = input.url?.trim();
-  const anonKey = input.anonKey?.trim();
+  const anonKey = input.publishableKey?.trim() || input.anonKey?.trim();
   if (!url || !anonKey) return null;
   try {
     const parsed = new URL(url);
@@ -23,6 +24,7 @@ export function readSupabaseConfig(input: {
 export function getSupabaseConfig(): SupabaseConfig | null {
   return readSupabaseConfig({
     url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    publishableKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   });
 }

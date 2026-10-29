@@ -2,6 +2,8 @@
 
 Fecha: 28 de octubre de 2026.
 
+> Actualización posterior: el proyecto Supabase alojado ya fue conectado y recibió las 18 migraciones. El estado actual y los pendientes están en [Supabase alojado](supabase-alojado.md). Los pendientes de infraestructura descritos abajo reflejan el momento de esta comprobación.
+
 ## Incidencia y corrección
 
 Al crear un partido, `POST /api/partidos` guardaba el evento y respondía `201`. Después, el montaje de `AdminMatch` fallaba porque `useMatchRealtime` llamaba directamente a `crypto.randomUUID()`. Se reproducía la pantalla «Se nos fue la pelota». Había una segunda llamada a la misma API al sortear equipos.

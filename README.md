@@ -45,11 +45,12 @@ El identificador técnico del proyecto local continúa siendo `cupo` para conser
 
 ## Variables
 
-| Variable                        | Valor                                                    |
-| ------------------------------- | -------------------------------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | URL HTTPS del proyecto, o HTTP en localhost              |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clave pública anon o publishable del mismo proyecto      |
-| `NEXT_PUBLIC_SITE_URL`          | URL pública canónica de la aplicación; opcional en local |
+| Variable                               | Valor                                                    |
+| -------------------------------------- | -------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | URL HTTPS del proyecto, o HTTP en localhost              |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Clave pública publishable del mismo proyecto             |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`        | Alternativa antigua/local si no hay publishable key      |
+| `NEXT_PUBLIC_SITE_URL`                 | URL pública canónica de la aplicación; opcional en local |
 
 La aplicación no necesita `service_role`, contraseña de PostgreSQL ni credenciales de Google en Vercel. Las claves administrativas de los scripts locales se obtienen de Supabase CLI, permanecen en memoria y no llegan al navegador.
 
@@ -122,16 +123,16 @@ La configuración local amplía los límites de Auth para estas suites. Ajusta l
 Para comprobar toda la suite de navegador sobre una compilación de producción local:
 
 ```sh
-CUPO_VERIFY_PRODUCTION=1 NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 npm run build
+npm run test:build
 CUPO_VERIFY_PRODUCTION=1 NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 npm run test:e2e
 ```
 
-Este modo usa `.next-qa` y el puerto 3100 para separar la verificación del servidor de desarrollo. Playwright inicia y detiene el servidor de pruebas; Supabase debe estar disponible en local. No configures `CUPO_VERIFY_PRODUCTION` en Vercel. La regresión de compatibilidad comprueba creación, edición, Realtime, sorteo y publicación de equipos con `crypto.randomUUID` ausente. Consulta el [informe de prepublicación](docs/verification/pre-publicacion.md).
+Este modo usa `.next-qa` y el puerto 3100 para separar la verificación del servidor de desarrollo. `test:build` toma las credenciales públicas de Supabase local y reemplaza ambos nombres de clave; así las pruebas permanecen locales aunque `.env.local` apunte al proyecto alojado. Playwright inicia y detiene el servidor de pruebas; Supabase debe estar disponible en local. No configures `CUPO_VERIFY_PRODUCTION` en Vercel. La regresión de compatibilidad comprueba creación, edición, Realtime, sorteo y publicación de equipos con `crypto.randomUUID` ausente. Consulta el [informe de prepublicación](docs/verification/pre-publicacion.md) y la [configuración de Supabase alojado](docs/verification/supabase-alojado.md).
 
 ## Vercel
 
 1. Importa el repositorio con preset **Next.js**, Node **22.x**, instalación `npm ci` y build `npm run build`. La salida se detecta automáticamente.
-2. Configura las tres variables del entorno. Usa un proyecto Supabase separado para Preview si vas a probar escrituras.
+2. Configura `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` y `NEXT_PUBLIC_SITE_URL`. El nombre antiguo `NEXT_PUBLIC_SUPABASE_ANON_KEY` sigue funcionando si no hay publishable key; si están ambos, se prefiere la publishable. Usa un proyecto Supabase separado para Preview si vas a probar escrituras.
 3. Aplica las migraciones y configura la cuenta administradora antes de usar el despliegue. El build no modifica la base.
 4. Publica y comprueba acceso del administrador, creación/edición, inscripción desde otro navegador, espera, Realtime, equipos y PNG. Si cambias variables públicas, vuelve a desplegar.
 
