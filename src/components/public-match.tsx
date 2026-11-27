@@ -25,6 +25,7 @@ import { ReadonlyPitch } from "./pitch";
 import { PlayerPass } from "./player-pass";
 import { PositionPreview } from "./position-preview";
 import { Jersey } from "./jersey";
+import { SubstitutesBench } from "./substitutes-bench";
 import { REVEAL_AUTO_KEY, TeamReveal, revealSignature } from "./team-reveal";
 import { launchConfetti } from "@/lib/confetti";
 import { haptic } from "@/lib/motion";
@@ -121,6 +122,7 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
   const remaining = Math.max(0, data.match.capacity - confirmed.length);
   const finished = data.match.status === "finished";
   const shownConfirmed = useAnimatedNumber(confirmed.length);
+  const confirmedIdSet = new Set(confirmed.map((item) => item.id));
   const urgent = !finished && remaining > 0 && remaining <= 2;
   const fillPercent = Math.min(
     100,
@@ -429,6 +431,11 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
                   </h2>
                   <span>{waitlist.length}</span>
                 </div>
+                <SubstitutesBench
+                  waitlist={waitlist}
+                  confirmedIds={confirmedIdSet}
+                  mineId={mine?.registration_id ?? null}
+                />
                 {waitlist.length === 0 ? (
                   <p className="empty-copy">
                     Si se llena el partido, los siguientes quedan aquí.
