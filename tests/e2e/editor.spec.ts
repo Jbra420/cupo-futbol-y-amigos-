@@ -72,7 +72,10 @@ test("edita equipos con arrastre, teclado y touch; publica, sincroniza y conserv
     page.locator(".team-editor").locator(".feedback[role=status]"),
   ).toContainText("Alineación guardada");
   await page.getByLabel("Nombre del equipo 1").fill("Los del barrio");
-  await page.getByLabel("Color del equipo 1").fill("#d45b22");
+  await page
+    .getByRole("radiogroup", { name: "Color del equipo 1" })
+    .getByRole("radio", { name: "Naranja", exact: true })
+    .check();
   await page
     .getByRole("button", { name: "Publicar equipos", exact: true })
     .click();

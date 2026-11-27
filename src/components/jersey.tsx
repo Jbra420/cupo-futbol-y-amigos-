@@ -14,6 +14,7 @@ export function Jersey({
 }) {
   const ink = inkOn(color);
   const light = (luminance(color) ?? 0) > 0.42;
+  const dark = (luminance(color) ?? 1) < 0.03;
   return (
     <svg
       className={`jersey ${className}`}
@@ -26,7 +27,7 @@ export function Jersey({
       <path
         d="M22 6 12 10 3 22l9 7 4-5v34h32V24l4 5 9-7-9-12-10-4c-1 5-5 8-10 8s-9-3-10-8Z"
         fill={color}
-        stroke={light ? "#0007" : "#0003"}
+        stroke={light ? "#0007" : dark ? "#ffffff80" : "#0003"}
         strokeWidth="1.5"
         strokeLinejoin="round"
       />

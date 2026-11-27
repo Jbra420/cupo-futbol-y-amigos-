@@ -1427,14 +1427,6 @@ legend {
   gap: 9px;
   align-items: center;
 }
-.team-config input[type="color"] {
-  width: 44px;
-  height: 44px;
-  min-height: 44px;
-  padding: 4px;
-  flex-shrink: 0;
-  cursor: pointer;
-}
 .team-config input:not([type="color"]) {
   font-size: 16px;
   font-weight: 650;
@@ -3515,5 +3507,92 @@ html[data-nav-direction="back"]::view-transition-new(root) {
   .readonly-token .token-shirt,
   .readonly-token .token-shirt .jersey {
     animation: none;
+  }
+}
+
+/* ===== Color de camiseta por equipo ===== */
+.team-config-shirt {
+  flex-shrink: 0;
+  filter: drop-shadow(0 3px 4px #0004);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.team-color-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 10px;
+}
+.color-swatch {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition:
+    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    border-color 0.2s,
+    background-color 0.2s;
+}
+.color-swatch .jersey {
+  filter: drop-shadow(0 2px 2px #0004);
+}
+.color-swatch:hover:not(.is-taken) {
+  transform: translateY(-2px);
+  background: var(--muted);
+}
+.color-swatch.is-checked {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+.color-swatch.is-checked .jersey {
+  animation: jersey-pop 0.4s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.color-swatch.is-checked::after {
+  content: "";
+  position: absolute;
+  right: -3px;
+  top: -3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 2px var(--card);
+}
+.color-swatch.is-taken {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+.color-swatch.is-taken::before {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 34px;
+  background: var(--muted-foreground);
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+.color-swatch:has(input:focus-visible) {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.color-swatch:has(input:disabled):not(.is-taken) {
+  cursor: default;
+  opacity: 0.6;
+}
+@media (max-width: 760px) {
+  .team-color-picker {
+    gap: 1px;
+  }
+  .color-swatch {
+    width: 32px;
+    height: 40px;
+    border-radius: 8px;
+  }
+  .color-swatch .jersey {
+    width: 27px;
+    height: 27px;
   }
 }

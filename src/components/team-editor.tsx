@@ -46,6 +46,7 @@ import {
 import { haptic, prefersReducedMotion } from "@/lib/motion";
 import { PitchBackground, initials } from "./pitch";
 import { Jersey } from "./jersey";
+import { TeamColorPicker } from "./team-color-picker";
 import { shortName, spreadTokens } from "@/lib/teams/layout";
 
 type Player = AdminSnapshot["registrations"][number];
@@ -714,21 +715,11 @@ export function TeamEditor({
                   className="preview-team"
                 >
                   <div className="team-config">
-                    <input
-                      aria-label={`Color del equipo ${team.idx + 1}`}
-                      type="color"
-                      value={team.color}
-                      disabled={busy || finished}
-                      onChange={(event) =>
-                        update({
-                          ...draftRef.current,
-                          teams: draftRef.current.teams.map((item) =>
-                            item.idx === team.idx
-                              ? { ...item, color: event.target.value }
-                              : item,
-                          ),
-                        })
-                      }
+                    <Jersey
+                      color={team.color}
+                      label={String(team.idx + 1)}
+                      size={44}
+                      className="team-config-shirt"
                     />
                     <input
                       aria-label={`Nombre del equipo ${team.idx + 1}`}
@@ -747,6 +738,21 @@ export function TeamEditor({
                       }
                     />
                   </div>
+                  <TeamColorPicker
+                    label={`Color del equipo ${team.idx + 1}`}
+                    name={`team-color-${snapshot.match.id}-${team.idx}`}
+                    value={team.color}
+                    rivalColor={draft.teams[1 - team.idx]?.color ?? ""}
+                    disabled={busy || finished}
+                    onChange={(color) =>
+                      update({
+                        ...draftRef.current,
+                        teams: draftRef.current.teams.map((item) =>
+                          item.idx === team.idx ? { ...item, color } : item,
+                        ),
+                      })
+                    }
+                  />
                   <p className="position-counts">
                     {POSITIONS.map((position) => (
                       <span key={position}>
