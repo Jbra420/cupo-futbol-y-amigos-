@@ -1,5 +1,6 @@
 import type { Assignment, PublicRegistration, TeamInfo } from "@/lib/contracts";
 import { shortName, spreadTokens } from "@/lib/teams/layout";
+import { Jersey } from "./jersey";
 export function initials(name: string) {
   const words = name.trim().split(/\s+/);
   return (
@@ -66,7 +67,7 @@ export function ReadonlyPitch({
       </div>
       <div className="editor-pitch">
         <PitchBackground />
-        {tokens.map(({ id, x, y, player, team }) => (
+        {tokens.map(({ id, x, y, player, team }, index) => (
           <div
             className="pitch-token readonly-token"
             key={id}
@@ -75,10 +76,17 @@ export function ReadonlyPitch({
                 left: `${x}%`,
                 top: `${y}%`,
                 "--team-color": team.color,
+                "--i": index,
               } as React.CSSProperties
             }
           >
-            <span>{initials(player.player_name)}</span>
+            <span className="token-shirt">
+              <Jersey
+                color={team.color}
+                label={initials(player.player_name).toUpperCase()}
+                size={44}
+              />
+            </span>
             <small>{shortName(player.player_name)}</small>
           </div>
         ))}

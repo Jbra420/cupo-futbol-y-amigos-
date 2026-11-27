@@ -45,6 +45,7 @@ import {
 } from "@/lib/teams/formation";
 import { haptic, prefersReducedMotion } from "@/lib/motion";
 import { PitchBackground, initials } from "./pitch";
+import { Jersey } from "./jersey";
 import { shortName, spreadTokens } from "@/lib/teams/layout";
 
 type Player = AdminSnapshot["registrations"][number];
@@ -232,7 +233,13 @@ function PitchPlayer({
         } as CSSProperties
       }
     >
-      <span>{initials(player.player_name)}</span>
+      <span className="token-shirt">
+        <Jersey
+          color={color}
+          label={initials(player.player_name).toUpperCase()}
+          size={44}
+        />
+      </span>
       <small>{shortName(player.player_name)}</small>
     </button>
   );
