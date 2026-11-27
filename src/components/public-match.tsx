@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   Users,
   Clock3,
+  Sparkles,
 } from "lucide-react";
 import { AppHeader } from "./app-header";
 import { Button } from "./ui/button";
@@ -24,6 +25,7 @@ import { ReadonlyPitch } from "./pitch";
 import { PlayerPass } from "./player-pass";
 import { PositionPreview } from "./position-preview";
 import { Jersey } from "./jersey";
+import { REVEAL_AUTO_KEY, TeamReveal, revealSignature } from "./team-reveal";
 import { launchConfetti } from "@/lib/confetti";
 import { haptic } from "@/lib/motion";
 import { useAnimatedNumber } from "@/hooks/use-animated-number";
@@ -182,6 +184,48 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
     }
     previousStatus.current = status;
   }, [mine?.status]);
+  // La ceremonia del sorteo se abre sola una vez por alineación publicada.
+  const [revealOpen, setRevealOpen] = useState(false);
+  const lineupRef = useRef<HTMLElement>(null);
+  const revealButtonRef = useRef<HTMLButtonElement>(null);
+  const lineupReady =
+    data.match.status === "teams_ready" &&
+    data.teams.length >= 2 &&
+    data.assignments.length > 0;
+  const signature = lineupReady ? revealSignature(data.assignments) : "";
+  useEffect(() => {
+    if (!ready || !signature) return;
+    const key = `cupo-reveal:${data.match.slug}:${signature}`;
+    try {
+      if (
+        localStorage.getItem(REVEAL_AUTO_KEY) === "off" ||
+        localStorage.getItem(key)
+      )
+        return;
+    } catch {
+      return;
+    }
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(key, "1");
+      } catch {
+        /* Almacenamiento opcional. */
+      }
+      setRevealOpen(true);
+    }, 700);
+    return () => clearTimeout(timer);
+  }, [ready, signature, data.match.slug]);
+  const closeReveal = useCallback((showPitch: boolean) => {
+    setRevealOpen(false);
+    requestAnimationFrame(() => {
+      if (showPitch)
+        lineupRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      revealButtonRef.current?.focus({ preventScroll: showPitch });
+    });
+  }, []);
   const myRegistration = mine
     ? data.registrations.find((item) => item.id === mine.registration_id)
     : undefined;
@@ -516,9 +560,22 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
           />
         </div>
         {data.teams.length > 0 && (
-          <section className="card roster-card public-lineup">
-            <p className="overline">ASÍ SALIMOS A LA CANCHA</p>
-            <h2>Los equipos están listos.</h2>
+          <section className="card roster-card public-lineup" ref={lineupRef}>
+            <div className="lineup-heading">
+              <div>
+                <p className="overline">ASÍ SALIMOS A LA CANCHA</p>
+                <h2>Los equipos están listos.</h2>
+              </div>
+              {lineupReady && (
+                <Button
+                  ref={revealButtonRef}
+                  variant="outline"
+                  onClick={() => setRevealOpen(true)}
+                >
+                  <Sparkles /> Ver el sorteo
+                </Button>
+              )}
+            </div>
             <ReadonlyPitch
               teams={data.teams}
               players={data.registrations}
@@ -550,6 +607,15 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
           </section>
         )}
       </main>
+      {revealOpen && (
+        <TeamReveal
+          match={data.match}
+          teams={data.teams}
+          players={data.registrations}
+          assignments={data.assignments}
+          onClose={closeReveal}
+        />
+      )}
       <div className="live-toasts" role="status" aria-live="polite">
         {toasts.map((toast) => (
           <div

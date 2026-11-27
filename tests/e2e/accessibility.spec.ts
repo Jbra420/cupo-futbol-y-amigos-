@@ -105,6 +105,10 @@ test("las pantallas principales son accesibles, mantienen foco y aceptan nombres
       ),
     ).toBe(true);
   }
+  // La ceremonia del sorteo se audita aparte; aquí se revisa la página.
+  await page.addInitScript(() =>
+    localStorage.setItem("cupo-reveal-auto", "off"),
+  );
   await page.goto(`/p/${match.slug}`);
   await audit();
   await page.screenshot({
