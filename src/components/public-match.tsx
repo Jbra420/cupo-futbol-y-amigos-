@@ -21,6 +21,12 @@ import { Button } from "./ui/button";
 import { MatchShare } from "./match-share";
 import { PositionBadge } from "./position-badge";
 import { ReadonlyPitch } from "./pitch";
+import { PlayerPass } from "./player-pass";
+import { PositionPreview } from "./position-preview";
+import { Jersey } from "./jersey";
+import { launchConfetti } from "@/lib/confetti";
+import { haptic } from "@/lib/motion";
+import { useAnimatedNumber } from "@/hooks/use-animated-number";
 import { createClient } from "@/lib/supabase/client";
 import { ensurePlayerSession } from "@/lib/player-session";
 import { useMatchRealtime } from "@/hooks/use-match-realtime";
@@ -30,7 +36,7 @@ import { spotsLabel } from "@/lib/utils/spots";
 import { formatMatchDate, formatPrice } from "@/lib/date";
 import {
   POSITIONS,
-  POSITION_ICONS,
+  POSITION_COLORS,
   POSITION_LABELS,
 } from "@/lib/utils/positions";
 import type { Position } from "@/types/database";
@@ -40,6 +46,8 @@ const mySchema = z.object({
   status: z.enum(["confirmed", "waitlist", "cancelled"]),
   waitlist_position: z.number().nullable(),
 });
+type Toast = { id: string; text: string; position: Position };
+const CELEBRATION_COLORS = ["#c5e86c", "#ffffff", "#16a34a"];
 export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
   const [data, setData] = useState(initial);
   const [mine, setMine] = useState<z.infer<typeof mySchema> | null>(null);
@@ -48,6 +56,10 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [celebrate, setCelebrate] = useState(false);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [freshIds, setFreshIds] = useState<Set<string>>(() => new Set());
+  const submitRef = useRef<HTMLButtonElement>(null);
   const client = createClient();
   const refresh = useCallback(async () => {
     const client = createClient();
@@ -106,6 +118,73 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
   );
   const remaining = Math.max(0, data.match.capacity - confirmed.length);
   const finished = data.match.status === "finished";
+  const shownConfirmed = useAnimatedNumber(confirmed.length);
+  const urgent = !finished && remaining > 0 && remaining <= 2;
+  const fillPercent = Math.min(
+    100,
+    (confirmed.length / Math.max(1, data.match.capacity)) * 100,
+  );
+  const mineRef = useRef(mine);
+  mineRef.current = mine;
+  // Detecta quién entra en vivo para anunciarlo y animar su fila.
+  const knownIds = useRef<Set<string> | null>(null);
+  const confirmedKey = confirmed.map((item) => item.id).join();
+  useEffect(() => {
+    const current = new Set(confirmed.map((item) => item.id));
+    const previous = knownIds.current;
+    knownIds.current = current;
+    if (!previous) return;
+    const arrivals = confirmed.filter((item) => !previous.has(item.id));
+    if (arrivals.length === 0) return;
+    setFreshIds(new Set(arrivals.map((item) => item.id)));
+    const others = arrivals.filter(
+      (item) => item.id !== mineRef.current?.registration_id,
+    );
+    if (others.length > 0) {
+      setToasts((list) =>
+        [
+          ...list,
+          ...others.map((item) => ({
+            id: `${item.id}-${Date.now()}`,
+            text: `${item.player_name} acaba de entrar`,
+            position: item.position,
+          })),
+        ].slice(-3),
+      );
+      haptic(12);
+    }
+    const timer = setTimeout(() => setFreshIds(new Set()), 1600);
+    return () => clearTimeout(timer);
+    // confirmedKey resume la lista; evitar depender del arreglo recreado.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [confirmedKey]);
+  useEffect(() => {
+    if (toasts.length === 0) return;
+    const timer = setTimeout(() => setToasts((list) => list.slice(1)), 4200);
+    return () => clearTimeout(timer);
+  }, [toasts]);
+  // Subir de la banca a la cancha también se celebra.
+  const previousStatus = useRef<string | null>(null);
+  useEffect(() => {
+    const status = mine?.status ?? null;
+    if (previousStatus.current === "waitlist" && status === "confirmed") {
+      setCelebrate(true);
+      setToasts((list) => [
+        ...list,
+        {
+          id: `promo-${Date.now()}`,
+          text: "¡Se liberó un cupo y entras a la cancha!",
+          position: "MED",
+        },
+      ]);
+      launchConfetti({ colors: CELEBRATION_COLORS });
+      haptic([30, 50, 90]);
+    }
+    previousStatus.current = status;
+  }, [mine?.status]);
+  const myRegistration = mine
+    ? data.registrations.find((item) => item.id === mine.registration_id)
+    : undefined;
   const joinRef = useRef<HTMLElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   const [joinVisible, setJoinVisible] = useState(true);
@@ -144,7 +223,20 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
         return;
       }
       const own = mySchema.safeParse(result.data);
-      if (own.success) setMine(own.data);
+      if (own.success) {
+        previousStatus.current = own.data.status;
+        setMine(own.data);
+        setCelebrate(true);
+        const rect = submitRef.current?.getBoundingClientRect();
+        launchConfetti({
+          colors: [POSITION_COLORS[position], ...CELEBRATION_COLORS],
+          origin: rect
+            ? { x: rect.left + rect.width / 2, y: rect.top }
+            : undefined,
+          count: own.data.status === "confirmed" ? 110 : 50,
+        });
+        haptic(own.data.status === "confirmed" ? [30, 50, 90] : 25);
+      }
       try {
         localStorage.setItem(
           "cupo-player",
@@ -177,6 +269,7 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
       if (result.error) setError(publicErrorMessage(result.error));
       else {
         setMine(null);
+        setCelebrate(false);
         await refresh();
       }
     } catch {
@@ -209,24 +302,43 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
             </span>
           </div>
         </div>
-        <section className="card spots-card">
+        <section
+          className={`card spots-card ${urgent ? "is-urgent" : ""} ${!finished && remaining === 0 ? "is-full" : ""}`}
+        >
           <div className="section-heading">
             <h2 aria-live="polite">
               {finished
                 ? "Partido finalizado"
-                : remaining
-                  ? spotsLabel(remaining)
-                  : "¡Cupos completos!"}
+                : remaining === 1
+                  ? "¡Último cupo!"
+                  : remaining
+                    ? spotsLabel(remaining)
+                    : "¡Cupos completos!"}
             </h2>
-            <span>
-              {confirmed.length}/{data.match.capacity}
+            <span className="spots-counter">
+              <strong>{shownConfirmed}</strong>/{data.match.capacity}
             </span>
           </div>
-          <progress
-            aria-label="Cupos confirmados"
-            value={confirmed.length}
-            max={data.match.capacity}
-          />
+          <div
+            className="spots-track"
+            style={{ "--fill": `${fillPercent}%` } as React.CSSProperties}
+          >
+            <progress
+              aria-label="Cupos confirmados"
+              value={confirmed.length}
+              max={data.match.capacity}
+            />
+            <span
+              className="spots-ball"
+              aria-hidden="true"
+              key={confirmed.length}
+            />
+          </div>
+          {!finished && remaining === 0 && (
+            <span className="full-stamp" aria-hidden="true">
+              COMPLETO
+            </span>
+          )}
           <p>
             <span className={`connection-dot ${live ? "live" : ""}`} />
             {live ? "Actualizado en tiempo real" : "Conectando con la cancha…"}
@@ -248,7 +360,7 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
               ) : (
                 confirmed.map((registration, index) => (
                   <div
-                    className={`roster-row ${mine?.registration_id === registration.id ? "own" : ""}`}
+                    className={`roster-row ${mine?.registration_id === registration.id ? "own" : ""} ${freshIds.has(registration.id) ? "is-new" : ""}`}
                     key={registration.id}
                   >
                     <span className="row-number">
@@ -300,7 +412,6 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
               </>
             ) : mine ? (
               <>
-                <CheckCircle2 size={32} className="text-primary" />
                 <p className="overline">TU LUGAR EN EL PARTIDO</p>
                 <h2 aria-live="polite">
                   {mine.status === "confirmed"
@@ -312,6 +423,15 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
                     ? "Prepara los zapatos. Nos vemos en la cancha."
                     : "Si alguien cancela, te confirmamos aquí automáticamente."}
                 </p>
+                <PlayerPass
+                  match={data.match}
+                  registrationId={mine.registration_id}
+                  name={myRegistration?.player_name ?? name}
+                  position={myRegistration?.position ?? position}
+                  status={mine.status}
+                  waitlistPosition={mine.waitlist_position}
+                  celebrate={celebrate}
+                />
                 <Button variant="outline" disabled={busy} onClick={cancel}>
                   {busy ? "Actualizando…" : "Cancelar mi cupo"}
                 </Button>
@@ -338,6 +458,7 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
                 </label>
                 <fieldset>
                   <legend>¿Dónde juegas?</legend>
+                  <PositionPreview position={position} name={name} />
                   <div className="position-picker">
                     {POSITIONS.map((item) => (
                       <button
@@ -351,14 +472,24 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
                           } as React.CSSProperties
                         }
                       >
-                        <span aria-hidden="true">{POSITION_ICONS[item]}</span>
+                        <span aria-hidden="true">
+                          <Jersey
+                            color={POSITION_COLORS[item]}
+                            label=""
+                            size={30}
+                          />
+                        </span>
                         <strong>{item}</strong>
                         <small>{POSITION_LABELS[item]}</small>
                       </button>
                     ))}
                   </div>
                 </fieldset>
-                <Button disabled={busy || !ready} className="join-submit">
+                <Button
+                  ref={submitRef}
+                  disabled={busy || !ready}
+                  className="join-submit"
+                >
                   {busy
                     ? "Reservando tu lugar…"
                     : remaining
@@ -419,6 +550,27 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
           </section>
         )}
       </main>
+      <div className="live-toasts" role="status" aria-live="polite">
+        {toasts.map((toast) => (
+          <div
+            className="live-toast"
+            key={toast.id}
+            style={
+              {
+                "--toast-color": POSITION_COLORS[toast.position],
+              } as React.CSSProperties
+            }
+          >
+            <span className="toast-dot" aria-hidden="true" />
+            <span>
+              {toast.text}
+              {!toast.id.startsWith("promo-") && (
+                <small> · {toast.position}</small>
+              )}
+            </span>
+          </div>
+        ))}
+      </div>
       {showStickyJoin && (
         <div className="sticky-join">
           <span>

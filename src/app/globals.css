@@ -2054,3 +2054,476 @@ button:focus-visible {
     flex-basis: 100%;
   }
 }
+
+/* ===== Fase A: experiencia viva ===== */
+.confetti-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 80;
+}
+
+/* Contador y barra con balón */
+.public-workspace .spots-card {
+  position: relative;
+  overflow: hidden;
+}
+.spots-counter strong {
+  font-variant-numeric: tabular-nums;
+  color: var(--foreground);
+}
+.spots-track {
+  position: relative;
+}
+.spots-track progress {
+  display: block;
+}
+.spots-track progress::-webkit-progress-value {
+  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.spots-ball {
+  position: absolute;
+  top: 50%;
+  left: clamp(9px, var(--fill), calc(100% - 9px));
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, #1b1b1b 0 22%, transparent 23%),
+    radial-gradient(circle at 18% 30%, #1b1b1b 0 12%, transparent 13%),
+    radial-gradient(circle at 82% 30%, #1b1b1b 0 12%, transparent 13%),
+    radial-gradient(circle at 30% 85%, #1b1b1b 0 12%, transparent 13%),
+    radial-gradient(circle at 70% 85%, #1b1b1b 0 12%, transparent 13%), #fff;
+  box-shadow:
+    0 0 0 2px var(--primary),
+    0 3px 6px #0004;
+  transition: left 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: ball-roll 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes ball-roll {
+  from {
+    transform: rotate(-300deg) scale(1.15);
+  }
+}
+
+/* Últimos cupos: latido */
+.spots-card.is-urgent {
+  border-color: color-mix(in srgb, var(--position-del) 55%, var(--border));
+  animation: urgent-glow 1.6s ease-in-out infinite;
+}
+.spots-card.is-urgent h2 {
+  color: var(--position-del);
+  animation: heartbeat 1.6s ease-in-out infinite;
+  transform-origin: left center;
+}
+@keyframes heartbeat {
+  0%,
+  40%,
+  100% {
+    transform: scale(1);
+  }
+  12% {
+    transform: scale(1.06);
+  }
+  24% {
+    transform: scale(1.02);
+  }
+}
+@keyframes urgent-glow {
+  50% {
+    box-shadow: 0 0 0 4px
+      color-mix(in srgb, var(--position-del) 18%, transparent);
+  }
+}
+
+/* Sello de completo */
+.full-stamp {
+  position: absolute;
+  right: 18px;
+  bottom: 12px;
+  padding: 4px 12px;
+  border: 3px solid var(--primary);
+  border-radius: 8px;
+  color: var(--primary);
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  transform: rotate(-9deg);
+  opacity: 0.85;
+  pointer-events: none;
+  animation: stamp-in 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+@keyframes stamp-in {
+  from {
+    opacity: 0;
+    transform: rotate(-20deg) scale(2.4);
+  }
+}
+
+/* Filas que entran en vivo */
+.roster-row.is-new {
+  animation: row-in 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.roster-row.is-new strong {
+  animation: row-flash 1.6s ease-out;
+}
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+}
+@keyframes row-flash {
+  0%,
+  30% {
+    color: var(--primary);
+  }
+}
+
+/* Avisos en vivo */
+.live-toasts {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  z-index: 60;
+  display: grid;
+  gap: 8px;
+  width: min(92vw, 380px);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.live-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--toast-color);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--card) 94%, transparent);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px #0003;
+  font-size: 13px;
+  font-weight: 600;
+  animation:
+    toast-in 0.45s cubic-bezier(0.3, 1.4, 0.5, 1),
+    toast-out 0.4s ease-in 3.8s forwards;
+}
+.live-toast small {
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+.toast-dot {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--toast-color);
+  box-shadow: 0 0 0 0 var(--toast-color);
+  animation: dot-ping 1.2s ease-out 2;
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.96);
+  }
+}
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+@keyframes dot-ping {
+  to {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+
+/* Pase de jugador */
+.player-pass-wrap {
+  display: grid;
+  gap: 12px;
+  perspective: 900px;
+}
+.player-pass {
+  --mx: 50%;
+  --my: 50%;
+  --rx: 0deg;
+  --ry: 0deg;
+  position: relative;
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  overflow: hidden;
+  border-radius: 18px;
+  color: #f4f7ee;
+  background:
+    radial-gradient(
+      120% 80% at 100% 0%,
+      color-mix(in srgb, var(--pass-accent) 38%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(160deg, #1d3a28, #10241a 70%);
+  border: 1px solid color-mix(in srgb, var(--pass-accent) 45%, #ffffff22);
+  box-shadow:
+    0 18px 40px #0005,
+    inset 0 1px 0 #ffffff1a;
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  transform-style: preserve-3d;
+  transition: transform 0.25s ease-out;
+}
+.player-pass.pass-enter {
+  animation: pass-flip 0.9s cubic-bezier(0.2, 1.2, 0.4, 1) both;
+}
+@keyframes pass-flip {
+  from {
+    opacity: 0;
+    transform: rotateY(-100deg) translateY(30px) scale(0.85);
+  }
+  60% {
+    opacity: 1;
+  }
+}
+.pass-shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  background:
+    radial-gradient(circle at var(--mx) var(--my), #ffffffaa, transparent 45%),
+    linear-gradient(
+      115deg,
+      transparent 20%,
+      #ff7ad933 35%,
+      #7afcff33 45%,
+      #fff47a33 55%,
+      transparent 70%
+    );
+  background-size:
+    100% 100%,
+    250% 250%;
+  background-position:
+    0 0,
+    var(--mx) var(--my);
+  transition: background-position 0.2s ease-out;
+}
+.player-pass.pass-enter .pass-shine {
+  animation: shine-sweep 1.6s ease-out 0.5s;
+}
+@keyframes shine-sweep {
+  from {
+    background-position:
+      0 0,
+      0% 0%;
+  }
+  to {
+    background-position:
+      0 0,
+      100% 100%;
+  }
+}
+.player-pass.exporting {
+  transform: none;
+  animation: none;
+}
+.pass-top,
+.pass-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.pass-top > span,
+.pass-code {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #c6d4c7;
+}
+.pass-body {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.pass-body .jersey {
+  flex-shrink: 0;
+  filter: drop-shadow(0 6px 10px #0006);
+}
+.player-pass.pass-enter .pass-body .jersey {
+  animation: jersey-pop 0.6s cubic-bezier(0.3, 1.6, 0.5, 1) 0.55s both;
+}
+@keyframes jersey-pop {
+  from {
+    transform: scale(0.4) rotate(-12deg);
+    opacity: 0;
+  }
+}
+.pass-body > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.pass-number {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--pass-accent);
+  font-weight: 800;
+}
+.pass-name {
+  font-size: 20px;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.pass-role {
+  font-size: 12px;
+  color: #c6d4c7;
+}
+.pass-match {
+  display: grid;
+  gap: 3px;
+  padding-top: 14px;
+  border-top: 2px dashed #ffffff2a;
+  font-size: 11px;
+  color: #c6d4c7;
+  overflow-wrap: anywhere;
+}
+.pass-match strong {
+  color: #f4f7ee;
+  font-size: 13px;
+}
+.pass-status {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--pass-accent);
+  color: #10241a;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+}
+.player-pass.is-bench {
+  filter: saturate(0.75);
+}
+.player-pass.is-bench .pass-status {
+  background: transparent;
+  color: var(--pass-accent);
+  box-shadow: inset 0 0 0 2px var(--pass-accent);
+}
+.pass-notice {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  text-align: center;
+}
+
+/* Mini-cancha del selector de posición */
+.position-preview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--zone-color) 6%, var(--background));
+  transition: background-color 0.3s;
+}
+.mini-pitch {
+  position: relative;
+  width: 66px;
+  height: 88px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #234e35;
+}
+.mini-pitch > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  stroke: #cce4b5;
+  stroke-width: 0.8;
+  opacity: 0.55;
+}
+.mini-zone {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 22%;
+  background: color-mix(in srgb, var(--zone-color) 45%, transparent);
+  box-shadow: 0 0 18px var(--zone-color);
+  transition:
+    top 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.3s;
+}
+.mini-jersey {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  line-height: 0;
+  transition: top 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: jersey-pop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.preview-copy {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 2px 12px;
+  min-width: 0;
+}
+.preview-copy .preview-shirt {
+  grid-row: span 2;
+  filter: drop-shadow(0 4px 8px #0003);
+}
+.preview-copy strong {
+  font-size: 15px;
+  align-self: end;
+}
+.preview-copy span {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  align-self: start;
+}
+.position-picker > button > span .jersey {
+  display: block;
+  transition: transform 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.position-picker > button[aria-pressed="true"] > span .jersey {
+  transform: scale(1.15) rotate(-6deg);
+}
+.position-picker > button:active {
+  transform: scale(0.97);
+}
+.position-picker > button {
+  transition:
+    transform 0.12s,
+    background-color 0.2s,
+    border-color 0.2s;
+}
+.join-submit:not(:disabled):active {
+  transform: scale(0.98);
+}
+@media (max-width: 400px) {
+  .preview-copy {
+    grid-template-columns: 1fr;
+  }
+  .preview-copy .preview-shirt {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spots-card.is-urgent,
+  .spots-card.is-urgent h2 {
+    animation: none;
+  }
+  .player-pass {
+    transform: none;
+  }
+}
+.public-workspace .spots-card.is-full {
+  padding-bottom: 52px;
+}
