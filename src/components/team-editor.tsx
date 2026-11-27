@@ -33,6 +33,7 @@ import type { Position } from "@/types/database";
 import { Button } from "./ui/button";
 import { PositionBadge } from "./position-badge";
 import { LineupShare } from "./lineup-share";
+import { BalanceScale, type ScaleSide } from "./balance-scale";
 import { PitchBackground, initials } from "./pitch";
 import { shortName, spreadTokens } from "@/lib/teams/layout";
 
@@ -537,10 +538,23 @@ export function TeamEditor({
           {notice}
         </p>
       )}
-      <p className="balance-indicator">
-        Diferencia de nivel: <strong>{Math.abs(totals[0] - totals[1])}</strong>
-        <span>Solo tú puedes ver este indicador.</span>
-      </p>
+      <div className="balance-indicator">
+        <p className="balance-heading">
+          Diferencia de nivel:{" "}
+          <strong>{Math.abs(totals[0] - totals[1])}</strong>
+        </p>
+        <BalanceScale
+          sides={
+            [0, 1].map((idx) => ({
+              name: draft.teams[idx].name || `Equipo ${idx + 1}`,
+              color: draft.teams[idx].color,
+              total: totals[idx],
+              count: groups[idx].length,
+            })) as [ScaleSide, ScaleSide]
+          }
+        />
+        <span className="balance-note">Solo tú puedes ver este indicador.</span>
+      </div>
       {Math.abs(groups[0].length - groups[1].length) > 1 && (
         <p className="empty-copy">
           Los equipos tienen distinta cantidad de jugadores. Puedes moverlos
