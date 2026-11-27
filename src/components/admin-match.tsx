@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { TransitionLink } from "./view-transitions";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import {
   CalendarDays,
@@ -144,13 +145,18 @@ export function AdminMatch({ initial }: { initial: AdminSnapshot }) {
   }
   return (
     <>
-      <Link href="/panel" className="back-link">
+      <TransitionLink href="/panel" className="back-link" direction="back">
         ← Tus partidos
-      </Link>
-      <div className="page-heading">
+      </TransitionLink>
+      <div
+        className="page-heading"
+        style={{ viewTransitionName: `match-card-${data.match.slug}` }}
+      >
         <div>
           <p className="overline">TÚ ARMAS EL PARTIDO</p>
-          <h1>{data.match.title}</h1>
+          <h1 style={{ viewTransitionName: `match-title-${data.match.slug}` }}>
+            {data.match.title}
+          </h1>
           <div className="match-facts">
             <span>
               <CalendarDays />

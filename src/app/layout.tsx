@@ -2,6 +2,7 @@ import { APP_NAME } from "@/lib/brand";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ViewTransitions } from "@/components/view-transitions";
 import "./globals.css";
 import { siteOrigin } from "@/lib/site";
 
@@ -22,7 +23,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es" suppressHydrationWarning>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <ViewTransitions>{children}</ViewTransitions>
+        </ThemeProvider>
       </body>
     </html>
   );

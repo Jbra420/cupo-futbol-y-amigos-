@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TransitionLink } from "@/components/view-transitions";
 import {
   CalendarDays,
   MapPin,
@@ -34,9 +35,9 @@ export default async function PanelPage() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/panel/nuevo">
+          <TransitionLink href="/panel/nuevo">
             <Plus /> Organizar partido
-          </Link>
+          </TransitionLink>
         </Button>
       </div>
       <div className="summary-strip">
@@ -46,9 +47,9 @@ export default async function PanelPage() {
         <span>
           <strong>{matches.length}</strong> partidos organizados
         </span>
-        <Link href="/panel/jugadores">
+        <TransitionLink href="/panel/jugadores">
           <Users size={17} /> Tu lista de jugadores <ArrowUpRight size={16} />
-        </Link>
+        </TransitionLink>
       </div>
       {error && (
         <p className="feedback error" role="alert">
@@ -69,10 +70,11 @@ export default async function PanelPage() {
       ) : (
         <div className="match-grid">
           {matches.map((match) => (
-            <Link
+            <TransitionLink
               className="match-card card"
               href={`/p/${match.slug}/admin`}
               key={match.id}
+              style={{ viewTransitionName: `match-card-${match.slug}` }}
             >
               <div className="card-topline">
                 <span
@@ -89,7 +91,9 @@ export default async function PanelPage() {
                 </span>
                 <ArrowUpRight size={20} />
               </div>
-              <h2>{match.title}</h2>
+              <h2 style={{ viewTransitionName: `match-title-${match.slug}` }}>
+                {match.title}
+              </h2>
               <p>
                 <CalendarDays size={17} />
                 {formatMatchDate(match.starts_at)}
@@ -102,7 +106,7 @@ export default async function PanelPage() {
                 <span>{match.capacity} cupos</span>
                 <span>Ver y editar partido →</span>
               </div>
-            </Link>
+            </TransitionLink>
           ))}
         </div>
       )}

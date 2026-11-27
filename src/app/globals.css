@@ -3375,3 +3375,74 @@ button:focus-visible {
     animation: none;
   }
 }
+
+/* ===== Transiciones entre pantallas ===== */
+.app-header {
+  view-transition-name: app-header;
+}
+::view-transition-group(*) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+::view-transition-old(root) {
+  animation: vt-leave 0.22s ease-in both;
+}
+::view-transition-new(root) {
+  animation: vt-enter 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
+}
+html[data-nav-direction="back"]::view-transition-old(root) {
+  animation-name: vt-leave-back;
+}
+html[data-nav-direction="back"]::view-transition-new(root) {
+  animation-name: vt-enter-back;
+}
+@keyframes vt-leave {
+  to {
+    opacity: 0;
+    transform: translateX(-28px) scale(0.99);
+  }
+}
+@keyframes vt-enter {
+  from {
+    opacity: 0;
+    transform: translateX(36px);
+  }
+}
+@keyframes vt-leave-back {
+  to {
+    opacity: 0;
+    transform: translateX(28px) scale(0.99);
+  }
+}
+@keyframes vt-enter-back {
+  from {
+    opacity: 0;
+    transform: translateX(-36px);
+  }
+}
+/* La cabecera de la app queda fija mientras cambia el contenido. */
+::view-transition-old(app-header),
+::view-transition-new(app-header) {
+  animation: none;
+}
+/* Las tarjetas que se convierten en cabecera cruzan su contenido sin estirar el texto. */
+::view-transition-old(*):only-child,
+::view-transition-new(*):only-child {
+  animation-duration: 0.3s;
+}
+::view-transition-image-pair(*) {
+  isolation: auto;
+}
+::view-transition-old(*),
+::view-transition-new(*) {
+  height: 100%;
+  object-fit: cover;
+  object-position: left top;
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

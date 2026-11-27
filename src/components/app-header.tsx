@@ -1,5 +1,5 @@
 import { BrandMark } from "./brand-mark";
-import Link from "next/link";
+import { TransitionLink } from "./view-transitions";
 import { LogOut } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { Button } from "./ui/button";
@@ -12,18 +12,21 @@ export function AppHeader({ organizer = false }: { organizer?: boolean }) {
         Ir al contenido
       </a>
       <header className="app-header">
-        <Link
+        <TransitionLink
+          direction="back"
           href={organizer ? "/panel" : "/"}
           className="wordmark"
           aria-label={`${APP_NAME}, inicio`}
         >
           <BrandMark />
-        </Link>
+        </TransitionLink>
         <div className="app-header-actions">
           {organizer && (
             <nav aria-label="Panel">
-              <Link href="/panel">Partidos</Link>
-              <Link href="/panel/jugadores">Jugadores</Link>
+              <TransitionLink href="/panel" direction="back">
+                Partidos
+              </TransitionLink>
+              <TransitionLink href="/panel/jugadores">Jugadores</TransitionLink>
             </nav>
           )}
           <ThemeToggle />
