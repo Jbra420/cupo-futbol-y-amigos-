@@ -34,6 +34,7 @@ import { Button } from "./ui/button";
 import { PositionBadge } from "./position-badge";
 import { LineupShare } from "./lineup-share";
 import { PitchBackground, initials } from "./pitch";
+import { shortName, spreadTokens } from "@/lib/teams/layout";
 
 type Player = AdminSnapshot["registrations"][number];
 type Draft = {
@@ -197,7 +198,7 @@ function PitchPlayer({
       }
     >
       <span>{initials(player.player_name)}</span>
-      <small>{player.player_name}</small>
+      <small>{shortName(player.player_name)}</small>
     </button>
   );
 }
@@ -356,6 +357,21 @@ export function TeamEditor({
             );
           });
         }
+      const positionOf = new Map(
+        confirmed.map((player) => [player.id, player.position]),
+      );
+      for (const point of spreadTokens(
+        Object.entries(next.positions).map(([id, value]) => ({
+          id,
+          ...value,
+          pinned: positionOf.get(id) === "POR",
+        })),
+      ))
+        next.positions[point.id] = {
+          team: point.team,
+          x: Math.round(point.x * 10) / 10,
+          y: point.y,
+        };
       onSaved(current);
       setRevision(current.match.revision);
       update(next);

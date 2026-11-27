@@ -1,6 +1,12 @@
 "use client";
 import { MatchLocation } from "./match-location";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
 import { z } from "zod";
 import {
   CalendarDays,
@@ -100,6 +106,23 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
   );
   const remaining = Math.max(0, data.match.capacity - confirmed.length);
   const finished = data.match.status === "finished";
+  const joinRef = useRef<HTMLElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const [joinVisible, setJoinVisible] = useState(true);
+  useEffect(() => {
+    const target = joinRef.current;
+    if (!target || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) =>
+      setJoinVisible(entry.isIntersecting),
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
+  const showStickyJoin = !finished && !mine && !joinVisible;
+  function goToJoin() {
+    joinRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    nameRef.current?.focus({ preventScroll: true });
+  }
   async function join(event: FormEvent) {
     event.preventDefault();
     setError("");
@@ -180,42 +203,37 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
             </span>
             <span>
               <Coins />
-              {formatPrice(data.match.price_per_player)} por jugador
+              {data.match.price_per_player === null
+                ? "Precio por definir"
+                : `${formatPrice(data.match.price_per_player)} por jugador`}
             </span>
           </div>
         </div>
-        <MatchShare match={data.match} confirmed={confirmed.length} />
-        <MatchLocation
-          location={data.match.location}
-          mapsUrl={data.match.maps_url}
-        />
+        <section className="card spots-card">
+          <div className="section-heading">
+            <h2 aria-live="polite">
+              {finished
+                ? "Partido finalizado"
+                : remaining
+                  ? spotsLabel(remaining)
+                  : "¡Cupos completos!"}
+            </h2>
+            <span>
+              {confirmed.length}/{data.match.capacity}
+            </span>
+          </div>
+          <progress
+            aria-label="Cupos confirmados"
+            value={confirmed.length}
+            max={data.match.capacity}
+          />
+          <p>
+            <span className={`connection-dot ${live ? "live" : ""}`} />
+            {live ? "Actualizado en tiempo real" : "Conectando con la cancha…"}
+          </p>
+        </section>
         <div className="public-layout">
           <div className="public-roster">
-            <section className="card spots-card">
-              <div className="section-heading">
-                <h2 aria-live="polite">
-                  {finished
-                    ? "Partido finalizado"
-                    : remaining
-                      ? spotsLabel(remaining)
-                      : "¡Cupos completos!"}
-                </h2>
-                <span>
-                  {confirmed.length}/{data.match.capacity}
-                </span>
-              </div>
-              <progress
-                aria-label="Cupos confirmados"
-                value={confirmed.length}
-                max={data.match.capacity}
-              />
-              <p>
-                <span className={`connection-dot ${live ? "live" : ""}`} />
-                {live
-                  ? "Actualizado en tiempo real"
-                  : "Conectando con la cancha…"}
-              </p>
-            </section>
             <section className="card roster-card">
               <div className="section-heading">
                 <h2>
@@ -247,29 +265,31 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
                 ))
               )}
             </section>
-            <section className="card roster-card">
-              <div className="section-heading">
-                <h2>
-                  <Clock3 /> En la lista de espera
-                </h2>
-                <span>{waitlist.length}</span>
-              </div>
-              {waitlist.length === 0 ? (
-                <p className="empty-copy">
-                  Si se llena el partido, los siguientes quedan aquí.
-                </p>
-              ) : (
-                waitlist.map((registration, index) => (
-                  <div className="roster-row" key={registration.id}>
-                    <span className="row-number">#{index + 1}</span>
-                    <strong>{registration.player_name}</strong>
-                    <PositionBadge position={registration.position} />
-                  </div>
-                ))
-              )}
-            </section>
+            {(waitlist.length > 0 || remaining === 0) && (
+              <section className="card roster-card">
+                <div className="section-heading">
+                  <h2>
+                    <Clock3 /> En la lista de espera
+                  </h2>
+                  <span>{waitlist.length}</span>
+                </div>
+                {waitlist.length === 0 ? (
+                  <p className="empty-copy">
+                    Si se llena el partido, los siguientes quedan aquí.
+                  </p>
+                ) : (
+                  waitlist.map((registration, index) => (
+                    <div className="roster-row" key={registration.id}>
+                      <span className="row-number">#{index + 1}</span>
+                      <strong>{registration.player_name}</strong>
+                      <PositionBadge position={registration.position} />
+                    </div>
+                  ))
+                )}
+              </section>
+            )}
           </div>
-          <aside className="card join-card">
+          <aside className="card join-card" id="unirme" ref={joinRef}>
             {finished ? (
               <>
                 <CheckCircle2 size={30} />
@@ -307,6 +327,7 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
                 <label>
                   Tu nombre
                   <input
+                    ref={nameRef}
                     value={name}
                     onChange={(event) => setName(event.target.value)}
                     required
@@ -356,6 +377,13 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
             )}
           </aside>
         </div>
+        <div className="public-extras">
+          <MatchShare match={data.match} confirmed={confirmed.length} />
+          <MatchLocation
+            location={data.match.location}
+            mapsUrl={data.match.maps_url}
+          />
+        </div>
         {data.teams.length > 0 && (
           <section className="card roster-card public-lineup">
             <p className="overline">ASÍ SALIMOS A LA CANCHA</p>
@@ -391,6 +419,19 @@ export function PublicMatch({ initial }: { initial: PublicSnapshot }) {
           </section>
         )}
       </main>
+      {showStickyJoin && (
+        <div className="sticky-join">
+          <span>
+            <strong>
+              {confirmed.length}/{data.match.capacity}
+            </strong>{" "}
+            {remaining ? spotsLabel(remaining) : "Cupos completos"}
+          </span>
+          <Button onClick={goToJoin}>
+            {remaining ? "Apuntarme" : "Lista de espera"}
+          </Button>
+        </div>
+      )}
       <footer className="workspace-footer">
         La hora del partido se muestra en America/Guayaquil.
       </footer>

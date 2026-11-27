@@ -1,4 +1,5 @@
 import type { Assignment, PublicRegistration, TeamInfo } from "@/lib/contracts";
+import { shortName, spreadTokens } from "@/lib/teams/layout";
 export function initials(name: string) {
   const words = name.trim().split(/\s+/);
   return (
@@ -32,6 +33,27 @@ export function ReadonlyPitch({
   players: PublicRegistration[];
   assignments: Assignment[];
 }) {
+  // Saved coordinates may come from older layouts where tokens overlap.
+  const tokens = spreadTokens(
+    assignments.flatMap((assignment) => {
+      const player = players.find(
+        (item) => item.id === assignment.registration_id,
+      );
+      const team = teams.find((item) => item.id === assignment.team_id);
+      return player && team
+        ? [
+            {
+              id: player.id,
+              x: assignment.pitch_x,
+              y: assignment.pitch_y,
+              pinned: player.position === "POR",
+              player,
+              team,
+            },
+          ]
+        : [];
+    }),
+  );
   return (
     <div className="readonly-lineup">
       <div className="pitch-team-names">
@@ -44,28 +66,22 @@ export function ReadonlyPitch({
       </div>
       <div className="editor-pitch">
         <PitchBackground />
-        {assignments.map((assignment) => {
-          const player = players.find(
-            (item) => item.id === assignment.registration_id,
-          );
-          const team = teams.find((item) => item.id === assignment.team_id);
-          return player && team ? (
-            <div
-              className="pitch-token readonly-token"
-              key={player.id}
-              style={
-                {
-                  left: `${assignment.pitch_x}%`,
-                  top: `${assignment.pitch_y}%`,
-                  "--team-color": team.color,
-                } as React.CSSProperties
-              }
-            >
-              <span>{initials(player.player_name)}</span>
-              <small>{player.player_name}</small>
-            </div>
-          ) : null;
-        })}
+        {tokens.map(({ id, x, y, player, team }) => (
+          <div
+            className="pitch-token readonly-token"
+            key={id}
+            style={
+              {
+                left: `${x}%`,
+                top: `${y}%`,
+                "--team-color": team.color,
+              } as React.CSSProperties
+            }
+          >
+            <span>{initials(player.player_name)}</span>
+            <small>{shortName(player.player_name)}</small>
+          </div>
+        ))}
       </div>
     </div>
   );
