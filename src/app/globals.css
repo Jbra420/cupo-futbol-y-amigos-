@@ -3098,3 +3098,79 @@ button:focus-visible {
   font-size: 12px;
   color: var(--muted-foreground);
 }
+
+/* ===== Fichas magnéticas ===== */
+.formation-slot {
+  position: absolute;
+  z-index: 0;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px dashed color-mix(in srgb, #ffffff 45%, transparent);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: slot-in 0.3s ease-out both;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s,
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.formation-slot small {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #ffffffa0;
+}
+.formation-slot.is-taken {
+  opacity: 0.25;
+}
+.formation-slot.is-target {
+  border-style: solid;
+  border-color: var(--team-color);
+  background: color-mix(in srgb, var(--team-color) 35%, transparent);
+  box-shadow: 0 0 18px var(--team-color);
+  transform: translate(-50%, -50%) scale(1.25);
+}
+.formation-slot.is-target small {
+  color: #fff;
+}
+.formation-slot.is-target::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--team-color);
+  animation: slot-ping 0.9s ease-out infinite;
+}
+@keyframes slot-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+}
+@keyframes slot-ping {
+  from {
+    opacity: 0.9;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+.editor-pitch .pitch-token {
+  z-index: 1;
+}
+.editor-pitch .pitch-token.dragging {
+  z-index: 50;
+}
+.editor-pitch.is-magnet .pitch-token:not(.dragging) {
+  opacity: 0.8;
+}
+@media (prefers-reduced-motion: reduce) {
+  .formation-slot.is-target::after {
+    animation: none;
+  }
+}

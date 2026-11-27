@@ -1,6 +1,7 @@
 "use client";
 import {
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -16,6 +17,8 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragMoveEvent,
+  type DragStartEvent,
 } from "@dnd-kit/core";
 import {
   Shuffle,
@@ -34,6 +37,13 @@ import { Button } from "./ui/button";
 import { PositionBadge } from "./position-badge";
 import { LineupShare } from "./lineup-share";
 import { BalanceScale, type ScaleSide } from "./balance-scale";
+import {
+  formationSlots,
+  magnetTarget,
+  visualDistance,
+  type Slot,
+} from "@/lib/teams/formation";
+import { haptic, prefersReducedMotion } from "@/lib/motion";
 import { PitchBackground, initials } from "./pitch";
 import { shortName, spreadTokens } from "@/lib/teams/layout";
 
@@ -167,24 +177,48 @@ function PlayerCard({
     </div>
   );
 }
+type Settle = { id: string; dx: number; dy: number; key: number };
 function PitchPlayer({
   player,
   color,
   position,
   disabled,
+  settle,
 }: {
   player: Player;
   color: string;
   position: Draft["positions"][string];
   disabled: boolean;
+  settle: Settle | null;
 }) {
   const { setNodeRef, attributes, listeners, transform, isDragging } =
     useDraggable({ id: player.id, disabled });
+  const node = useRef<HTMLButtonElement | null>(null);
+  const settleKey = settle?.id === player.id ? settle.key : null;
+  // La ficha sale desde donde se soltó y cae en su puesto con un rebote.
+  useLayoutEffect(() => {
+    if (settleKey === null || !settle || !node.current) return;
+    if (prefersReducedMotion()) return;
+    node.current.animate(
+      [
+        {
+          transform: `translate(-50%,-50%) translate(${settle.dx}px,${settle.dy}px) scale(1.12)`,
+        },
+        { transform: "translate(-50%,-50%) scale(1)" },
+      ],
+      { duration: 460, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" },
+    );
+    // Solo cuando llega un nuevo asentamiento para esta ficha.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settleKey]);
   return (
     <button
       type="button"
       className={`pitch-token ${isDragging ? "dragging" : ""}`}
-      ref={setNodeRef}
+      ref={(element) => {
+        node.current = element;
+        setNodeRef(element);
+      }}
       {...attributes}
       {...listeners}
       disabled={disabled}
@@ -219,6 +253,12 @@ export function TeamEditor({
   const [notice, setNotice] = useState("");
   const [view, setView] = useState<"list" | "pitch">("list");
   const [drawn, setDrawn] = useState(false);
+  const [magnet, setMagnet] = useState<{
+    id: string;
+    team: number;
+    target: Slot | null;
+  } | null>(null);
+  const [settle, setSettle] = useState<Settle | null>(null);
   const pitchRef = useRef<HTMLDivElement>(null);
   const players = snapshot.registrations.filter(
     (player) => player.status === "confirmed",
@@ -428,33 +468,88 @@ export function TeamEditor({
     const complete = players.every((player) => next.positions[player.id]);
     void save(next, snapshot.match.status === "teams_ready" && complete);
   }
+  /** Punto (en %) donde caería la ficha con el desplazamiento actual. */
+  function droppedPoint(id: string, delta: { x: number; y: number }) {
+    const rect = pitchRef.current?.getBoundingClientRect();
+    const old = draftRef.current.positions[id];
+    if (!rect || !old) return null;
+    return {
+      rect,
+      old,
+      point: {
+        x: Math.min(95, Math.max(5, old.x + (delta.x / rect.width) * 100)),
+        y: Math.min(95, Math.max(5, old.y + (delta.y / rect.height) * 100)),
+      },
+    };
+  }
+  function findTarget(id: string, point: { x: number; y: number }) {
+    const old = draftRef.current.positions[id];
+    if (!old) return null;
+    return magnetTarget({
+      point,
+      team: old.team,
+      origin: old,
+      others: Object.entries(draftRef.current.positions)
+        .filter(([otherId]) => otherId !== id)
+        .map(([, value]) => value),
+    });
+  }
+  function dragStart(event: DragStartEvent) {
+    if (view !== "pitch") return;
+    const id = String(event.active.id);
+    const old = draftRef.current.positions[id];
+    if (old) setMagnet({ id, team: old.team, target: null });
+  }
+  function dragMove(event: DragMoveEvent) {
+    if (view !== "pitch") return;
+    const id = String(event.active.id);
+    const dropped = droppedPoint(id, event.delta);
+    if (!dropped) return;
+    const target = findTarget(id, dropped.point);
+    setMagnet((current) => {
+      if (!current || current.id !== id) return current;
+      if (current.target === target) return current;
+      if (
+        current.target &&
+        target &&
+        current.target.x === target.x &&
+        current.target.y === target.y
+      )
+        return current;
+      if (target) haptic(6);
+      return { ...current, target };
+    });
+  }
   function dragEnd(event: DragEndEvent) {
     const id = String(event.active.id);
+    setMagnet(null);
     if (view === "list") {
       const target = String(event.over?.id ?? "");
       if (target.startsWith("board-"))
         move(id, target === "board-none" ? null : Number(target.slice(-1)));
     } else {
-      const rect = pitchRef.current?.getBoundingClientRect();
-      const old = draftRef.current.positions[id];
-      if (!rect || !old) return;
+      const dropped = droppedPoint(id, event.delta);
+      if (!dropped) return;
+      const { rect, old, point } = dropped;
+      // Imán: si cae cerca de un puesto libre de la formación, se acomoda ahí.
+      const target = findTarget(id, point);
+      const final = target ? { x: target.x, y: target.y } : point;
       const next = {
         ...draftRef.current,
         positions: {
           ...draftRef.current.positions,
-          [id]: {
-            ...old,
-            x: Math.min(
-              95,
-              Math.max(5, old.x + (event.delta.x / rect.width) * 100),
-            ),
-            y: Math.min(
-              95,
-              Math.max(5, old.y + (event.delta.y / rect.height) * 100),
-            ),
-          },
+          [id]: { ...old, ...final },
         },
       };
+      if (target) {
+        setSettle({
+          id,
+          dx: ((point.x - final.x) / 100) * rect.width,
+          dy: ((point.y - final.y) / 100) * rect.height,
+          key: Date.now(),
+        });
+        haptic([10, 30, 14]);
+      }
       update(next);
       void save(next, snapshot.match.status === "teams_ready");
     }
@@ -581,7 +676,10 @@ export function TeamEditor({
       <DndContext
         id={`teams-${snapshot.match.id}`}
         sensors={sensors}
+        onDragStart={dragStart}
+        onDragMove={dragMove}
         onDragEnd={dragEnd}
+        onDragCancel={() => setMagnet(null)}
         accessibility={{
           announcements: {
             onDragStart: ({ active }) =>
@@ -700,8 +798,38 @@ export function TeamEditor({
                 </span>
               ))}
             </div>
-            <div className="editor-pitch" ref={pitchRef}>
+            <div
+              className={`editor-pitch ${magnet ? "is-magnet" : ""}`}
+              ref={pitchRef}
+            >
               <PitchBackground />
+              {magnet &&
+                formationSlots(magnet.team).map((slot) => {
+                  const taken = Object.entries(draft.positions).some(
+                    ([otherId, value]) =>
+                      otherId !== magnet.id &&
+                      value.team === magnet.team &&
+                      visualDistance(value, slot) < 7,
+                  );
+                  const active =
+                    magnet.target?.x === slot.x && magnet.target?.y === slot.y;
+                  return (
+                    <span
+                      key={`${slot.x}-${slot.y}`}
+                      className={`formation-slot ${taken ? "is-taken" : ""} ${active ? "is-target" : ""}`}
+                      style={
+                        {
+                          left: `${slot.x}%`,
+                          top: `${slot.y}%`,
+                          "--team-color": draft.teams[magnet.team].color,
+                        } as CSSProperties
+                      }
+                      aria-hidden="true"
+                    >
+                      <small>{slot.line}</small>
+                    </span>
+                  );
+                })}
               {players.map((player) => {
                 const position = draft.positions[player.id];
                 return position ? (
@@ -711,6 +839,7 @@ export function TeamEditor({
                     position={position}
                     color={draft.teams[position.team].color}
                     disabled={busy || finished}
+                    settle={settle}
                   />
                 ) : null;
               })}
